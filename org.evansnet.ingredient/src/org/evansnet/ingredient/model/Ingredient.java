@@ -14,11 +14,16 @@ public class Ingredient {
 	
 	String ingredientName;
 	String ingredientDescription;
+	IngredientType type;
 	String strUom;			// A temporary class for test. TODO: Replace with UOM when written.
 	String pkgUom;
 	BigDecimal unitPrice;
 	BigDecimal pkgPrice;
 	boolean isRecipe;		// TODO: Add the recipe class reference when Recipe is written.
+	
+	public Ingredient() {
+		fetchTypes();
+	}
 	
 	private PropertyChangeSupport pcs = 
 			new PropertyChangeSupport(this);
@@ -80,6 +85,14 @@ public class Ingredient {
 		this.isRecipe = b;
 		pcs.firePropertyChange("isRecipe", oldIsRecipe, isRecipe);
 	}
+	
+	/**
+	 * Fetch the ingredient types 
+	 */
+	private void fetchTypes() {
+		// TODO: implement fetchTypes in the Ingredient class
+	}
+
 
 	public void addProertyChangeListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);
