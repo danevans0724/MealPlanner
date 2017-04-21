@@ -7,12 +7,6 @@ Bundle-Activator: org.evansnet.ingredient.app.Activator
 Bundle-Vendor: evansnet
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.core.databinding,
- org.eclipse.core.databinding.beans,
- org.eclipse.core.databinding.observable,
- org.eclipse.core.databinding.property,
- org.eclipse.jface.databinding,
- com.ibm.icu,
  org.evansnet.dataconnector;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy

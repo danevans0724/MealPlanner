@@ -14,6 +14,7 @@ import org.eclipse.swt.SWT;
  * 
  * @author pmidce0
  */
+
 public class TestIngredientComposite {
 	
 	IngredientCompositeBase ingTest;
