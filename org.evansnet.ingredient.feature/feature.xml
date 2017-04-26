@@ -17,8 +17,18 @@
       [Enter License Description here.]
    </license>
 
+   <requires>
+      <import plugin="org.evansnet.dataconnector"/>
+      <import plugin="org.evansnet.measure"/>
+      <import plugin="org.evansnet.process"/>
+   </requires>
+
    <plugin
          id="org.evansnet.ingredient"
+         os="linux,win32"
+         ws="gtk,win32"
+         nl="en_US"
+         arch="x86,x86_64"
          download-size="0"
          install-size="0"
          version="0.0.0"
