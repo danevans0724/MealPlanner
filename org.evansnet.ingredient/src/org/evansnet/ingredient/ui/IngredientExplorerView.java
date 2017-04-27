@@ -1,5 +1,6 @@
 package org.evansnet.ingredient.ui;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
@@ -12,17 +13,17 @@ import org.eclipse.ui.part.ViewPart;
  */
 public class IngredientExplorerView extends ViewPart {
 	public static final String ID = "org.evansnet.ingredient.ui.ingredientexplorerview";
+	
+	Composite treeComposite;
 
 	@Override
 	public void createPartControl(Composite parent) {
-		// TODO Auto-generated method stub
-
+		treeComposite = new IngredientExplorerComposite(parent, SWT.NONE);
 	}
 
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
-
+		treeComposite.setFocus();
 	}
 
 }

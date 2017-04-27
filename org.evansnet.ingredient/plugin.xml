@@ -39,6 +39,7 @@
          <view
                id="org.evansnet.ingredient.ui.ingredientexplorerview"
                minimized="false"
+               ratio=".20"
                relationship="left"
                relative="org.eclipse.ui.editorss"
                showTitle="true"
@@ -63,7 +64,16 @@
                tooltip="Create, edit or remove ingredients">
             <command
                   commandId="org.evansnet.ingredient.command.ingredient.create"
+                  id="org.evansnet.ingredient.ui.main.menu.create"
                   label="Create"
+                  mnemonic="&amp;c"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.evansnet.ingredient.command.ingredient.save"
+                  id="org.evansnet.ingredient.ui.main.menu.save"
+                  label="Save"
+                  mnemonic="&amp;s"
                   style="push">
             </command>
          </menu>
@@ -72,14 +82,15 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            category="Ingredient"
             categoryId="org.evansnet.ingredient"
+            defaultHandler="org.eclipse.core.commands.AbstractHandler"
             description="Create a new ingredient"
             id="org.evansnet.ingredient.command.ingredient.create"
             name="Create">
       </command>
       <command
             categoryId="org.evansnet.ingredient"
+            defaultHandler="org.eclipse.core.commands.AbstractHandler"
             description="Save the ingredient"
             id="org.evansnet.ingredient.command.ingredient.save"
             name="Save">
@@ -99,7 +110,7 @@
          point="org.eclipse.ui.handlers">
       <handler
             class="CreateIngredientHandler"
-            commandId="org.evansnet.ingredient.command.ingrecdient.create">
+            commandId="org.evansnet.ingredient.command.ingredient.create">
       </handler>
       <handler
             class="IngredientSaveHandler"
