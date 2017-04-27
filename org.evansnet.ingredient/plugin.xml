@@ -28,7 +28,7 @@
       <view
             category="Ingredient "
             class="org.evansnet.ingredient.ui.IngredientExplorerView"
-            id="org.evansnet.ingredient.ui.IngredientExplorerView"
+            id="org.evansnet.ingredient.ui.ingredientexplorerview"
             name="Ingredient Explorer ">
       </view>
    </extension>
@@ -37,11 +37,11 @@
       <perspectiveExtension
             targetID="*">
          <view
-               id="org.evansnet.ingredient.view"
+               id="org.evansnet.ingredient.ui.ingredientexplorerview"
                minimized="false"
                relationship="left"
                relative="org.eclipse.ui.editorss"
-               standalone="true"
+               showTitle="true"
                visible="true">
          </view>
       </perspectiveExtension>

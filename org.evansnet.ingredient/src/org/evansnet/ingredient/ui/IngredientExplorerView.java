@@ -11,6 +11,7 @@ import org.eclipse.ui.part.ViewPart;
  *
  */
 public class IngredientExplorerView extends ViewPart {
+	public static final String ID = "org.evansnet.ingredient.ui.ingredientexplorerview";
 
 	@Override
 	public void createPartControl(Composite parent) {
