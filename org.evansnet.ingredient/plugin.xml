@@ -14,17 +14,22 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            name="Perspective"
             class="org.evansnet.ingredient.app.Perspective"
-            id="org.evansnet.ingredient.perspective">
+            fixed="false"
+            id="org.evansnet.ingredient.perspective"
+            name="Ingredient Perspective">
+         <description>
+            Allows for the creation, edit, and listing of ingredients.
+         </description>
       </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.views">
       <view
-            name="View"
-            class="org.evansnet.ingredient.app.View"
-            id="org.evansnet.ingredient.view">
+            category="Ingredient "
+            class="org.evansnet.ingredient.ui.IngredientExplorerView"
+            id="org.evansnet.ingredient.ui.ingredientexplorerview"
+            name="Ingredient Explorer ">
       </view>
    </extension>
    <extension
@@ -32,11 +37,13 @@
       <perspectiveExtension
             targetID="*">
          <view
-               standalone="true"
+               id="org.evansnet.ingredient.ui.ingredientexplorerview"
                minimized="false"
-               relative="org.eclipse.ui.editorss"
+               ratio=".20"
                relationship="left"
-               id="org.evansnet.ingredient.view">
+               relative="org.eclipse.ui.editorss"
+               showTitle="true"
+               visible="true">
          </view>
       </perspectiveExtension>
    </extension>
@@ -51,7 +58,64 @@
                   label="Exit">
             </command>
          </menu>
+         <menu
+               id="org.evansnet.Ingredient.ui.IngredientMenu"
+               label="Ingredient"
+               tooltip="Create, edit or remove ingredients">
+            <command
+                  commandId="org.evansnet.ingredient.command.ingredient.create"
+                  id="org.evansnet.ingredient.ui.main.menu.create"
+                  label="Create"
+                  mnemonic="&amp;c"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.evansnet.ingredient.command.ingredient.save"
+                  id="org.evansnet.ingredient.ui.main.menu.save"
+                  label="Save"
+                  mnemonic="&amp;s"
+                  style="push">
+            </command>
+         </menu>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="org.evansnet.ingredient"
+            defaultHandler="org.eclipse.core.commands.AbstractHandler"
+            description="Create a new ingredient"
+            id="org.evansnet.ingredient.command.ingredient.create"
+            name="Create">
+      </command>
+      <command
+            categoryId="org.evansnet.ingredient"
+            defaultHandler="org.eclipse.core.commands.AbstractHandler"
+            description="Save the ingredient"
+            id="org.evansnet.ingredient.command.ingredient.save"
+            name="Save">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.evansnet.ingredient.ui.IngredientEditor"
+            default="false"
+            extensions="ing"
+            id="org.evansnet.ingredient.ingredienteditor"
+            name="Ingredient Editor">
+      </editor>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="CreateIngredientHandler"
+            commandId="org.evansnet.ingredient.command.ingredient.create">
+      </handler>
+      <handler
+            class="IngredientSaveHandler"
+            commandId="org.evansnet.ingredient.handlers.save">
+      </handler>
    </extension>
 
 </plugin>

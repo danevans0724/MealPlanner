@@ -66,6 +66,14 @@ public class IngredientCompositeBase extends Composite {
 		txtIngredientDescription = new Text(this, SWT.BORDER);
 		txtIngredientDescription.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
+		Label lblType = new Label(this, SWT.NONE);
+		lblType.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		lblType.setText("Type: ");
+		
+		Combo cmbType = new Combo(this, SWT.NONE);
+		cmbType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		new Label(this, SWT.NONE);
+		
 		Label lblRecipeUnitOf = new Label(this, SWT.NONE);
 		lblRecipeUnitOf.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblRecipeUnitOf.setText("Recipe Unit of Measure: ");

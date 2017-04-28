@@ -7,6 +7,13 @@ import org.evansnet.ingredient.ui.IngredientCompositeBase;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.SWT;
 
+/**
+ * Provide a display and shell to provide a UI for 
+ * evaluating the layout and functionality of the 
+ * ingredient composite.
+ * 
+ * @author pmidce0
+ */
 
 public class TestIngredientComposite {
 	

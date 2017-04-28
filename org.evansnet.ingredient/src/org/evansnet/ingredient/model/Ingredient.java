@@ -81,6 +81,7 @@ public class Ingredient {
 		pcs.firePropertyChange("isRecipe", oldIsRecipe, isRecipe);
 	}
 
+
 	public void addProertyChangeListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);
 	}

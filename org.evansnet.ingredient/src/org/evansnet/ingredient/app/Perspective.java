@@ -4,11 +4,13 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 
 public class Perspective implements IPerspectiveFactory {
+	public static final String ID = "org.evansnet.ingredient.perspective"; 
 
 	public void createInitialLayout(IPageLayout layout) {
-		layout.setEditorAreaVisible(false);
+		layout.setEditorAreaVisible(true);
 		layout.setFixed(true);
-		
+		//TODO: Add the perspective layout and then
+		//      add the explorer view with the tree.
 	}
 
 }
