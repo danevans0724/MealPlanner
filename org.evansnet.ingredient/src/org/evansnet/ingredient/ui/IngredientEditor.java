@@ -1,6 +1,7 @@
 package org.evansnet.ingredient.ui;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
@@ -9,7 +10,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
-
+import org.eclipse.ui.part.EditorPart;
 import org.evansnet.ingredient.ui.IngredientInput;
 
 
@@ -19,78 +20,31 @@ import org.evansnet.ingredient.ui.IngredientInput;
  * @author pmidce0
  *
  */
-public class IngredientEditor implements IEditorPart {
+public class IngredientEditor extends EditorPart {
+	
+	public static final String ID = "org.evansnet.ingredient.ingredienteditor";	
+	IngredientCompositeBase ingEditorComposite;
 
-	@Override
-	public void addPropertyListener(IPropertyListener listener) {
-		// TODO Auto-generated method stub
-
+	public IngredientEditor() {
+		super();
 	}
-
-	@Override
-	public void createPartControl(Composite parent) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public IWorkbenchPartSite getSite() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getTitle() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Image getTitleImage() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public String getTitleToolTip() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void removePropertyListener(IPropertyListener listener) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void setFocus() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public <T> T getAdapter(Class<T> adapter) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
 	public void doSaveAs() {
 		// TODO Auto-generated method stub
+		
+	}
 
+	@Override
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		setSite(site);
+		setInput(input);
 	}
 
 	@Override
@@ -106,27 +60,13 @@ public class IngredientEditor implements IEditorPart {
 	}
 
 	@Override
-	public boolean isSaveOnCloseNeeded() {
-		// TODO Auto-generated method stub
-		return false;
+	public void createPartControl(Composite parent) {
+		ingEditorComposite = new IngredientCompositeBase(parent, SWT.NONE);		
 	}
 
 	@Override
-	public IEditorInput getEditorInput() {
-		// TODO Auto-generated method stub
-		return null;
+	public void setFocus() {
+		
 	}
-
-	@Override
-	public IEditorSite getEditorSite() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
-		// TODO Auto-generated method stub
-
-	}
-
+	
 }

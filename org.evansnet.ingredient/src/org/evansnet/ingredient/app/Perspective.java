@@ -9,8 +9,6 @@ public class Perspective implements IPerspectiveFactory {
 	public void createInitialLayout(IPageLayout layout) {
 		layout.setEditorAreaVisible(true);
 		layout.setFixed(true);
-		//TODO: Add the perspective layout and then
-		//      add the explorer view with the tree.
 	}
 
 }

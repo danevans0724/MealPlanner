@@ -25,8 +25,12 @@
    </extension>
    <extension
          point="org.eclipse.ui.views">
+      <category
+            id="org.evansnet.ingredient.views.category"
+            name="org.evansnet.ingredient.views.category">
+      </category>
       <view
-            category="Ingredient "
+            category="org.evansnet.ingredient.views.category"
             class="org.evansnet.ingredient.ui.IngredientExplorerView"
             id="org.evansnet.ingredient.ui.ingredientexplorerview"
             name="Ingredient Explorer ">
@@ -81,16 +85,18 @@
    </extension>
    <extension
          point="org.eclipse.ui.commands">
+      <category
+            id="org.evansnet.ingredient.category"
+            name="org.evansnet.ingredient.category">
+      </category>
       <command
-            categoryId="org.evansnet.ingredient"
-            defaultHandler="org.eclipse.core.commands.AbstractHandler"
+            categoryId="org.evansnet.ingredient.category"
             description="Create a new ingredient"
             id="org.evansnet.ingredient.command.ingredient.create"
             name="Create">
       </command>
       <command
-            categoryId="org.evansnet.ingredient"
-            defaultHandler="org.eclipse.core.commands.AbstractHandler"
+            categoryId="org.evansnet.ingredient.category"
             description="Save the ingredient"
             id="org.evansnet.ingredient.command.ingredient.save"
             name="Save">
@@ -103,19 +109,25 @@
             default="false"
             extensions="ing"
             id="org.evansnet.ingredient.ingredienteditor"
-            name="Ingredient Editor">
+            name="org.evansnet.ingredient.ingredienteditor">
       </editor>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="CreateIngredientHandler"
+            class="org.evansnet.ingredient.handlers.CreateIngredientHandler"
             commandId="org.evansnet.ingredient.command.ingredient.create">
       </handler>
       <handler
-            class="IngredientSaveHandler"
-            commandId="org.evansnet.ingredient.handlers.save">
+            class="org.evansnet.ingredient.handlers.IngredientSaveHandler"
+            commandId="org.evansnet.ingredient.command.ingredient.save">
       </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.helpSupport">
+      <config
+            class="org.evansnet.ingredient.AbstractHelpUI">
+      </config>
    </extension>
 
 </plugin>
