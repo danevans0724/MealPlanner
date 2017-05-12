@@ -2,13 +2,9 @@ package org.evansnet.ingredient.ui;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IPropertyListener;
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.evansnet.ingredient.ui.IngredientInput;
@@ -24,6 +20,7 @@ public class IngredientEditor extends EditorPart {
 	
 	public static final String ID = "org.evansnet.ingredient.ingredienteditor";	
 	IngredientCompositeBase ingEditorComposite;
+	boolean dirty = false;
 
 	public IngredientEditor() {
 		super();
@@ -31,14 +28,17 @@ public class IngredientEditor extends EditorPart {
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-		
+		// TODO Create ingredient save routine.
+		// 1. Get / open a database connection
+		// 2. If new ingredient, create insert statement,
+		// 3. otherwise, create update statement.
+		// 4. Write data to the table.
+		// 5. Close the connection.
 	}
 
 	@Override
 	public void doSaveAs() {
-		// TODO Auto-generated method stub
-		
+		// Do nothing for now.
 	}
 
 	@Override
@@ -49,13 +49,12 @@ public class IngredientEditor extends EditorPart {
 
 	@Override
 	public boolean isDirty() {
-		// TODO Auto-generated method stub
-		return false;
+		return dirty;
 	}
 
 	@Override
 	public boolean isSaveAsAllowed() {
-		// TODO Auto-generated method stub
+		// Disable save-as for now. Each ingredient should be saved as itself.
 		return false;
 	}
 
@@ -66,7 +65,7 @@ public class IngredientEditor extends EditorPart {
 
 	@Override
 	public void setFocus() {
-		
+		ingEditorComposite.setFocus();
 	}
 	
 }

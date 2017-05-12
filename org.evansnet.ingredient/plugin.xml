@@ -109,7 +109,7 @@
             default="false"
             extensions="ing"
             id="org.evansnet.ingredient.ingredienteditor"
-            name="org.evansnet.ingredient.ingredienteditor">
+            name="Ingredient editor">
       </editor>
    </extension>
    <extension

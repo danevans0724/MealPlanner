@@ -80,10 +80,7 @@ public class IngredientCompositeBase extends Composite {
 		
 		cmbUom = new Combo(this, SWT.NONE);
 		cmbUom.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		// TODO: Replace the fill code when the UOM class becomes available
-		for (String s : uom) {
-			cmbUom.add(s);
-		}
+		// TODO: Add the fill code when the UOM class becomes available
 		
 		Label lblPackageUnitOf = new Label(this, SWT.NONE);
 		lblPackageUnitOf.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -91,10 +88,7 @@ public class IngredientCompositeBase extends Composite {
 		
 		cmbPkgUom = new Combo(this, SWT.NONE);
 		cmbPkgUom.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		// TODO: Replace the fill code when the UOM class becomes available
-		for (String s : uom) {
-			cmbPkgUom.add(s);
-		}
+		//Add call to populate list here.
 		
 		Label lblUnitPrice = new Label(this, SWT.NONE);
 		lblUnitPrice.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -149,6 +143,8 @@ public class IngredientCompositeBase extends Composite {
 			}
 		});
 		
+		//Temporary call to populate combo box
+		populateLists();		
 	}
 
 	private void dirtyFlag(boolean b) {
@@ -202,5 +198,25 @@ public class IngredientCompositeBase extends Composite {
 	protected void checkSubclass() {
 		// Disable the check that prevents subclassing of SWT components
 	}
+	
+	/**
+	 * Temporary method that will populate the list boxes while the 
+	 * measurement units plug-in is under development.
+	 */
+	private void populateLists() {
+		List<String> units = new ArrayList<String>();
+		units.add("ounces");
+		units.add("pounds");
+		units.add("grams");
+		units.add("fl ounces");
+		units.add("each");
+		units.add("other");
+		
+		for(String s : units) {
+			cmbUom.add(s);
+			cmbPkgUom.add(s);
+		}
+	}
+	
 	
 }

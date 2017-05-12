@@ -22,8 +22,6 @@ public class CreateIngredientHandler extends AbstractHandler {
 	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		System.out.println("Creating an ingredient!");
-		// TODO Open the editor with the editing composite within it.
 		IWorkbenchWindow ingEditorWindow = HandlerUtil.getActiveWorkbenchWindow(event);
 		IWorkbenchPage thisPage = ingEditorWindow.getActivePage();
 		IngredientInput input = new IngredientInput();
