@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Button;
 
 import org.evansnet.ingredient.model.Ingredient;
+import org.evansnet.ingredient.model.IngredientType;
 
 import java.math.BigDecimal;
 
@@ -24,10 +25,12 @@ public class IngredientCompositeBase extends Composite {
 	private Text txtIngredientDescription;
 	private Text txtUnitPrice;
 	private Text txtPackagePrice;
+	private Combo cmbType;
 	private Combo cmbUom;
 	private Combo cmbPkgUom;
 	private Button btnHasARecipe;
 	private boolean dirty = false;
+	private IngredientType ingredientTypes;
 	
 
 	Ingredient ingredient = new Ingredient();
@@ -70,7 +73,7 @@ public class IngredientCompositeBase extends Composite {
 		lblType.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblType.setText("Type: ");
 		
-		Combo cmbType = new Combo(this, SWT.NONE);
+		cmbType = new Combo(this, SWT.NONE);
 		cmbType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		new Label(this, SWT.NONE);
 		
@@ -143,8 +146,22 @@ public class IngredientCompositeBase extends Composite {
 			}
 		});
 		
+		// Placeholders for permanent methods.
+		fillTypesList();
+		fillMeasuresList();
+		
 		//Temporary call to populate combo box
 		populateLists();		
+	}
+
+	private void fillTypesList() {
+		// TODO Create permanent method for filling the ingredient types list.
+		// TODO: UnMarshall the ingredient types from a table and into the combo.
+	}
+	
+	private void fillMeasuresList() {
+		//TODO: Create the fillMeasuresList() method. 
+		//TODO: UnMarshall the measurement types from persistent storage and populate the combos.
 	}
 
 	private void dirtyFlag(boolean b) {
@@ -204,6 +221,8 @@ public class IngredientCompositeBase extends Composite {
 	 * measurement units plug-in is under development.
 	 */
 	private void populateLists() {
+		//TODO: Write code to get list contents from persistent storage and 
+		//      then remove this temporary method.
 		List<String> units = new ArrayList<String>();
 		units.add("ounces");
 		units.add("pounds");
@@ -215,6 +234,19 @@ public class IngredientCompositeBase extends Composite {
 		for(String s : units) {
 			cmbUom.add(s);
 			cmbPkgUom.add(s);
+		}
+		
+		// Now populate the ingredient types
+		List<String> types = new ArrayList<String>();
+		types.add("Staples");
+		types.add("Canned goods");
+		types.add("Dry goods");
+		types.add("Baking");
+		types.add("Frozen foods");
+		types.add("Fruits & vegetables");
+		
+		for(String t : types) {
+			cmbType.add(t);
 		}
 	}
 	

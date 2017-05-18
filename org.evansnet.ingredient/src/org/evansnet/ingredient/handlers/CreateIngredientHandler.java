@@ -1,14 +1,15 @@
 package org.evansnet.ingredient.handlers;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.evansnet.ingredient.app.Perspective;
 import org.evansnet.ingredient.ui.IngredientEditor;
 import org.evansnet.ingredient.ui.IngredientInput;
 
@@ -20,8 +21,11 @@ import org.evansnet.ingredient.ui.IngredientInput;
  */
 public class CreateIngredientHandler extends AbstractHandler {
 	
+	public final Logger javaLogger = Logger.getLogger("CreateIngredientLogger");
+	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		javaLogger.log(Level.INFO, "Opening ingredient editor");
 		IWorkbenchWindow ingEditorWindow = HandlerUtil.getActiveWorkbenchWindow(event);
 		IWorkbenchPage thisPage = ingEditorWindow.getActivePage();
 		IngredientInput input = new IngredientInput();
@@ -29,7 +33,8 @@ public class CreateIngredientHandler extends AbstractHandler {
 		try {
 			thisPage.openEditor(input, IngredientEditor.ID);
 		} catch (WorkbenchException e) {
-			// TODO Auto-generated catch block
+			javaLogger.log(Level.SEVERE, "Unable to open ingredient creation editor." 
+					+ e.getMessage());
 			e.printStackTrace();
 		}
 		
