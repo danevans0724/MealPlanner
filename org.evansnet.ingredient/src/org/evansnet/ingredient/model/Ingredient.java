@@ -20,6 +20,8 @@ public class Ingredient {
 	BigDecimal pkgPrice;
 	boolean isRecipe;		// TODO: Add the recipe class reference when Recipe is written.
 	
+	
+	
 	private PropertyChangeSupport pcs = 
 			new PropertyChangeSupport(this);
 	

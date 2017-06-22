@@ -18,9 +18,19 @@ import org.evansnet.ingredient.model.IngredientType;
 import java.math.BigDecimal;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.ArrayList;
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.observable.value.IObservableValue;
+import org.eclipse.jface.databinding.swt.WidgetProperties;
+import org.eclipse.core.databinding.beans.PojoProperties;
 
 public class IngredientCompositeBase extends Composite {
+	
+	public Logger logger = Logger.getLogger("IngredientCompositeLogger");
+	
+	private DataBindingContext m_bindingContext;
 	private Text txtIngredientName;
 	private Text txtIngredientDescription;
 	private Text txtUnitPrice;
@@ -32,11 +42,12 @@ public class IngredientCompositeBase extends Composite {
 	private boolean dirty = false;
 	private IngredientType ingredientTypes;
 	
-
 	Ingredient ingredient = new Ingredient();
 	
 	// Temporary objects remove and re-code when UOM is available.
 	List<String> uom = new ArrayList<String>();
+	private Label lblIngredientName;
+	private Button btnHasARecipe_1;
 	
 
 	/**
@@ -54,7 +65,7 @@ public class IngredientCompositeBase extends Composite {
 		uom.add("package");
 		uom.add("fl ounce");
 		
-		Label lblIngredientName = new Label(this, SWT.NONE);
+		lblIngredientName = new Label(this, SWT.NONE);
 		lblIngredientName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblIngredientName.setText("Ingredient Name:");
 		
@@ -107,12 +118,12 @@ public class IngredientCompositeBase extends Composite {
 		txtPackagePrice = new Text(this, SWT.BORDER);
 		txtPackagePrice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		
-		Button btnHasARecipe = new Button(this, SWT.CHECK);
-		btnHasARecipe.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
-		btnHasARecipe.setText("Has a recipe");
+		btnHasARecipe_1 = new Button(this, SWT.CHECK);
+		btnHasARecipe_1.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
+		btnHasARecipe_1.setText("Has a recipe");
 		new Label(this, SWT.NONE);
 		
-		btnHasARecipe.addSelectionListener(new SelectionAdapter() {
+		btnHasARecipe_1.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (ingredient.isRecipe()) {
 					ingredient.setRecipe(false);
@@ -130,8 +141,11 @@ public class IngredientCompositeBase extends Composite {
 		
 		btnIngredientOK.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				updateModel();
 				dirtyFlag(true);
+				updateModel();
+				logger.log(Level.INFO, "Ok button pressed, handling. ");
+				System.out.println("\nOk pressed, model state is now...\n----------------------------");
+				showModel();
 			}
 		});
 		
@@ -142,7 +156,7 @@ public class IngredientCompositeBase extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				clearControls();
 				dirtyFlag(false);
-				btnHasARecipe.setSelection(false);
+				btnHasARecipe_1.setSelection(false);
 			}
 		});
 		
@@ -152,6 +166,7 @@ public class IngredientCompositeBase extends Composite {
 		
 		//Temporary call to populate combo box
 		populateLists();		
+		m_bindingContext = initDataBindings();
 	}
 
 	private void fillTypesList() {
@@ -169,8 +184,8 @@ public class IngredientCompositeBase extends Composite {
 	}
 
 	private void updateModel() {
-		Double up;
-		Double pp;
+		Double up;		//Unit price
+		Double pp;		//Package price
 		
 		// Test for non-numeric values
 		try {
@@ -187,15 +202,20 @@ public class IngredientCompositeBase extends Composite {
 			return;
 		}
 		
-		// All is well, update the model.
-		ingredient.setIngredientName(txtIngredientName.getText());
-		ingredient.setIngredientDescription(txtIngredientDescription.getText());
-		ingredient.setStrUom(cmbUom.getText());
-		ingredient.setPkgUom(cmbPkgUom.getText());
-		ingredient.setUnitPrice(BigDecimal.valueOf(up));
-		ingredient.setPkgPrice(BigDecimal.valueOf(pp));
-		ingredient.setRecipe(btnHasARecipe.getSelection());
 		dirtyFlag(false);
+		System.out.println("\nModel checked and updated");
+		showModel();
+	}
+	
+	public void showModel() {
+		System.out.println("The state of the model\n-------------------------------");
+		System.out.println("Ingredient name: " + ingredient.getIngredientName());
+		System.out.println("Description: " + ingredient.getIngredientDescription());
+		System.out.println("Unit of measure: " + ingredient.getPkgUom());
+		System.out.println("Package unit of measure: " + ingredient.getPkgUom());
+		System.out.println("Unit price: " + ingredient.getUnitPrice());
+		System.out.println("Package price: " + ingredient.getPkgPrice());
+		System.out.println("This ingredient has a recipe: " + ingredient.isRecipe());
 	}
 
 	private void clearControls() {
@@ -227,6 +247,7 @@ public class IngredientCompositeBase extends Composite {
 		units.add("ounces");
 		units.add("pounds");
 		units.add("grams");
+		units.add("cups");
 		units.add("fl ounces");
 		units.add("each");
 		units.add("other");
@@ -249,6 +270,45 @@ public class IngredientCompositeBase extends Composite {
 			cmbType.add(t);
 		}
 	}
-	
-	
+	protected DataBindingContext initDataBindings() {
+		DataBindingContext bindingContext = new DataBindingContext();
+		//
+		IObservableValue observeTextTxtUnitPriceObserveWidget = WidgetProperties.text(SWT.Modify).observe(txtUnitPrice);
+		IObservableValue unitPriceIngredientObserveValue = PojoProperties.value("unitPrice").observe(ingredient);
+		bindingContext.bindValue(observeTextTxtUnitPriceObserveWidget, unitPriceIngredientObserveValue, null, null);
+		//
+		IObservableValue observeTextCmbTypeObserveWidget = WidgetProperties.text().observeDelayed(4, cmbType);
+		IObservableValue typeNameIngredientTypesObserveValue = PojoProperties.value("typeName").observe(ingredientTypes);
+		bindingContext.bindValue(observeTextCmbTypeObserveWidget, typeNameIngredientTypesObserveValue, null, null);
+		//
+		IObservableValue observeTextTxtPackagePriceObserveWidget = WidgetProperties.text(SWT.Modify).observe(txtPackagePrice);
+		IObservableValue pkgPriceIngredientObserveValue = PojoProperties.value("pkgPrice").observe(ingredient);
+		bindingContext.bindValue(observeTextTxtPackagePriceObserveWidget, pkgPriceIngredientObserveValue, null, null);
+		//
+		IObservableValue observeTextCmbPkgUomObserveWidget = WidgetProperties.text().observe(cmbPkgUom);
+		IObservableValue pkgUomIngredientObserveValue = PojoProperties.value("pkgUom").observe(ingredient);
+		bindingContext.bindValue(observeTextCmbPkgUomObserveWidget, pkgUomIngredientObserveValue, null, null);
+		//
+		IObservableValue observeTextCmbUomObserveWidget = WidgetProperties.text().observe(cmbUom);
+		IObservableValue strUomIngredientObserveValue = PojoProperties.value("strUom").observe(ingredient);
+		bindingContext.bindValue(observeTextCmbUomObserveWidget, strUomIngredientObserveValue, null, null);
+		//
+		IObservableValue observeSelectionBtnHasARecipe_1ObserveWidget = WidgetProperties.selection().observe(btnHasARecipe_1);
+		IObservableValue recipeIngredientObserveValue = PojoProperties.value("recipe").observe(ingredient);
+		bindingContext.bindValue(observeSelectionBtnHasARecipe_1ObserveWidget, recipeIngredientObserveValue, null, null);
+		//
+		IObservableValue observeTextTxtIngredientNameObserveWidget_1 = WidgetProperties.text(SWT.Modify).observe(txtIngredientName);
+		IObservableValue ingredientNameIngredientObserveValue = PojoProperties.value("ingredientName").observe(ingredient);
+		bindingContext.bindValue(observeTextTxtIngredientNameObserveWidget_1, ingredientNameIngredientObserveValue, null, null);
+		//
+		IObservableValue observeTextTxtIngredientDescriptionObserveWidget = WidgetProperties.text(SWT.Modify).observe(txtIngredientDescription);
+		IObservableValue ingredientDescriptionIngredientObserveValue = PojoProperties.value("ingredientDescription").observe(ingredient);
+		bindingContext.bindValue(observeTextTxtIngredientDescriptionObserveWidget, ingredientDescriptionIngredientObserveValue, null, null);
+		//
+		
+		// Show the state of the model
+		showModel();
+		
+		return bindingContext;
+	}
 }
