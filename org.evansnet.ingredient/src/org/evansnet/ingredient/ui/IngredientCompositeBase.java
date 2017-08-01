@@ -133,33 +133,6 @@ public class IngredientCompositeBase extends Composite {
 			}
 		});
 		
-		Button btnIngredientOK = new Button(this, SWT.NONE);
-		GridData gd_btnIngredientOK = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1);
-		gd_btnIngredientOK.widthHint = 56;
-		btnIngredientOK.setLayoutData(gd_btnIngredientOK);
-		btnIngredientOK.setText("OK");
-		
-		btnIngredientOK.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				dirtyFlag(true);
-				updateModel();
-				logger.log(Level.INFO, "Ok button pressed, handling. ");
-				System.out.println("\nOk pressed, model state is now...\n----------------------------");
-				showModel();
-			}
-		});
-		
-		Button btnNewButton = new Button(this, SWT.NONE);
-		btnNewButton.setText("Cancel");
-		
-		btnNewButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				clearControls();
-				dirtyFlag(false);
-				btnHasARecipe_1.setSelection(false);
-			}
-		});
-		
 		// Placeholders for permanent methods.
 		fillTypesList();
 		fillMeasuresList();
@@ -203,8 +176,8 @@ public class IngredientCompositeBase extends Composite {
 		}
 		
 		dirtyFlag(false);
-		System.out.println("\nModel checked and updated");
-		showModel();
+		logger.log(Level.INFO,"\nIngredientCompositeBase.updateModel()\nModel checked and updated");
+//		showModel();
 	}
 	
 	public void showModel() {
@@ -229,6 +202,18 @@ public class IngredientCompositeBase extends Composite {
 	
 	public boolean isDirty() {
 		return dirty;
+	}
+	
+	/**
+	 * Returns the ingredient populated by this composite's widgets.
+	 * @return The ingredient created by this composite, null if the ingredient
+	 * is not defined.
+	 */
+	public Ingredient getIngredient() {
+		if (isDirty()) {
+			return ingredient;
+		}
+		return null;
 	}
 
 	@Override

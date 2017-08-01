@@ -97,6 +97,7 @@
       </command>
       <command
             categoryId="org.evansnet.ingredient.category"
+            defaultHandler="org.evansnet.ingredient.handlers.IngredientSaveHandler"
             description="Save the ingredient"
             id="org.evansnet.ingredient.command.ingredient.save"
             name="Save">
