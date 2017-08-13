@@ -1,6 +1,7 @@
 package org.evansnet.ingredient.persistance;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -54,7 +55,18 @@ public class PersistenceProvider {
 	 * connector dialog and persists the connection info to the repository.
 	 */
 	public void showConnDialog() {
-		conn = (Connection)connectDialog.open();	
+		try {
+			DatabaseMetaData dbmd;
+			conn = (Connection)connectDialog.open();
+			dbmd = conn.getMetaData();
+			db.setDatabaseName(conn.getCatalog());
+			db.setSchema(conn.getSchema());
+//			dbmd.getTables(catalog, schemaPattern, tableNamePattern, types);
+		} catch (SQLException e) {
+			javaLogger.log(Level.SEVERE, "An error occurred while getting metadata from the database.");
+			javaLogger.log(Level.SEVERE, e.getErrorCode()+ ": " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 	
 	public void doSave() throws SQLException {
@@ -89,8 +101,8 @@ public class PersistenceProvider {
 	private String buildInsertQuery(Ingredient i) {
 		StringBuilder sb = new StringBuilder("INSERT INTO ");
 		sb.append(db.getSchema() + "." + db.getDatabaseName());
-		sb.append(" VALUES( ");
-		sb.append(getNextID()); //TODO: Get the next ID from the database table
+		sb.append(" VALUES( "); 
+		sb.append(getNextID()); 
 		sb.append("\"" + i.getIngredientName() + "\",");
 		sb.append("\"" + i.getIngredientDescription() + "\",");
 		sb.append("\"" + i.getStrUom() + "\",");
@@ -100,10 +112,8 @@ public class PersistenceProvider {
 		
 		if (i.isRecipe()) {
 			sb.append(1 + ",");
-		}else {
-			sb.append(0 + " );");
 		}
-		
+		sb.append(0 + " );");
 		javaLogger.log(Level.FINEST, "Insert query; " + sb.toString());
 		return sb.toString();
 	}
@@ -123,7 +133,7 @@ public class PersistenceProvider {
 			javaLogger.log(Level.SEVERE, "Not able to get the next ingredient ID \n" + 
 		       "Encountered an exception when accessing the database " + 
 					db.getDatabaseName()+"." + db.getDatabaseName() + "\n" + 
-		            e.getErrorCode() + e.getMessage());
+		            e.getErrorCode() + " " + e.getMessage());
 		}
 		return ++lastID;
 	}
