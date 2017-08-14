@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
+import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.dataconnector.internal.core.DBMS;
 import org.evansnet.dataconnector.internal.core.Host;
 import org.evansnet.dataconnector.internal.core.IHost;
@@ -36,7 +37,7 @@ public class PersistenceProvider {
 	 */		
 	private static Logger javaLogger = Logger.getLogger("IngredientPersistanceProvider");
 	IHost host;
-	DBMS  db;
+	IDatabase  db;
 	ConnectionDialog connectDialog;
 	Connection conn;
 	Ingredient ingredient;
@@ -54,11 +55,12 @@ public class PersistenceProvider {
 	 * connector dialog and persists the connection info to the repository.
 	 */
 	public void showConnDialog() {
-		conn = (Connection)connectDialog.open();	
+		db = (IDatabase)connectDialog.open();
+		conn = db.getConnection();	
 	}
 	
 	public void doSave() throws SQLException {
-		Statement sqlStatement = conn.createStatement();
+		Statement sqlStatement = db.getConnection().createStatement();
 		String query = buildInsertQuery(ingredient);
 		int rows = sqlStatement.executeUpdate(query);
 		javaLogger.log(Level.INFO, "IngredientPersistenceProvider.doSave() \n " + 
@@ -114,16 +116,16 @@ public class PersistenceProvider {
 	 */
 	private int getNextID() {
 		int lastID = 0;
-		String query = "SELECT COUNT(ID) FROM " + db.getDatabaseName() + ";";
+		String query = "SELECT COUNT(ID) FROM " + db.getSchema()+ "." + "INGREDIENT" + ";";
 		try {
 			Statement sqlStatement = conn.createStatement();
 			ResultSet rs = sqlStatement.executeQuery(query);
-			lastID = rs.getInt(0);
+			lastID = rs.getInt(0); 
 		} catch (SQLException e) {
 			javaLogger.log(Level.SEVERE, "Not able to get the next ingredient ID \n" + 
 		       "Encountered an exception when accessing the database " + 
 					db.getDatabaseName()+"." + db.getDatabaseName() + "\n" + 
-		            e.getErrorCode() + e.getMessage());
+		            e.getErrorCode() + " " + e.getMessage());
 		}
 		return ++lastID;
 	}
