@@ -120,6 +120,7 @@ public class PersistenceProvider {
 		try {
 			Statement sqlStatement = conn.createStatement();
 			ResultSet rs = sqlStatement.executeQuery(query);
+			rs.next();
 			lastID = rs.getInt(0); 
 		} catch (SQLException e) {
 			javaLogger.log(Level.SEVERE, "Not able to get the next ingredient ID \n" + 
