@@ -92,7 +92,7 @@ public class PersistenceProvider {
 		StringBuilder sb = new StringBuilder("INSERT INTO ");
 		sb.append(db.getSchema() + "." + db.getDatabaseName());
 		sb.append(" VALUES( ");
-		sb.append(getNextID()); //TODO: Get the next ID from the database table
+		sb.append(getNextID() + ","); 
 		sb.append("\"" + i.getIngredientName() + "\",");
 		sb.append("\"" + i.getIngredientDescription() + "\",");
 		sb.append("\"" + i.getStrUom() + "\",");
@@ -121,7 +121,7 @@ public class PersistenceProvider {
 			Statement sqlStatement = conn.createStatement();
 			ResultSet rs = sqlStatement.executeQuery(query);
 			rs.next();
-			lastID = rs.getInt(0); 
+			lastID = rs.getInt(1); 
 		} catch (SQLException e) {
 			javaLogger.log(Level.SEVERE, "Not able to get the next ingredient ID \n" + 
 		       "Encountered an exception when accessing the database " + 
