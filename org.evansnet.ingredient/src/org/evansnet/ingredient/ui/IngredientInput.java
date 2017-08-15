@@ -14,10 +14,11 @@ import org.evansnet.ingredient.model.Ingredient;
 public class IngredientInput implements IEditorInput {
 
 	@Override
-	public <T> T getAdapter(Class<T> adapter) {
+	public Object getAdapter(Class adapter) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 
 	@Override
 	public boolean exists() {
@@ -48,5 +49,6 @@ public class IngredientInput implements IEditorInput {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 }

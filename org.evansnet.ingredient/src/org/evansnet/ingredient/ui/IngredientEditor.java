@@ -1,6 +1,8 @@
 package org.evansnet.ingredient.ui;
 
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -9,7 +11,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.persistance.IngredientPersistenceAction;
 import org.evansnet.ingredient.persistance.PersistenceProvider;
 
@@ -23,6 +24,7 @@ import org.evansnet.ingredient.persistance.PersistenceProvider;
 public class IngredientEditor extends EditorPart {
 	
 	public static final String ID = "org.evansnet.ingredient.ingredienteditor";	
+	public static Logger javaLogger = Logger.getLogger("Ingredient editor logger");
 	IngredientCompositeBase ingEditorComposite;
 	boolean dirty = false;
 
@@ -32,7 +34,6 @@ public class IngredientEditor extends EditorPart {
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Create ingredient save routine.
 		// 1. Get / open a database connection
 		PersistenceProvider provider = new PersistenceProvider(this.ingEditorComposite.getShell(),
 				ingEditorComposite.getIngredient(),
@@ -41,7 +42,7 @@ public class IngredientEditor extends EditorPart {
 		//TODO: Later we should already have connections defined and just use them. 
 		//      For now, we'll get the connection each time. 
 		provider.showConnDialog();
-		// 2. If new ingredient, create insert statement,
+		// 2. If new ingredient, create insert statement, // TODO: Write routine to check for existing
 		// 3. otherwise, create update statement.
 		// 4. Write data to the table.
 		try {
@@ -49,7 +50,8 @@ public class IngredientEditor extends EditorPart {
 			// 5. Close the connection.
 			provider.closeConnection();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+			javaLogger.log(Level.SEVERE, "An error occurred while trying to save an ingredient. \n " +
+				e.getErrorCode() + " " + e.getMessage() );
 			e.printStackTrace();
 		}
 	}
@@ -67,6 +69,7 @@ public class IngredientEditor extends EditorPart {
 
 	@Override
 	public boolean isDirty() {
+		// TODO: Implement change listeners on controls and set the dirty flag if changed.
 		return dirty;
 	}
 

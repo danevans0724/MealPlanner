@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.ProgressBar;
 import org.eclipse.swt.widgets.Shell;
@@ -102,10 +101,8 @@ public class PersistenceProvider {
 		
 		if (i.isRecipe()) {
 			sb.append(1 + ",");
-		}else {
-			sb.append(0 + " );");
 		}
-		
+		sb.append(0 + " );");
 		javaLogger.log(Level.FINEST, "Insert query; " + sb.toString());
 		return sb.toString();
 	}
