@@ -5,17 +5,18 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Button;
 
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.model.IngredientType;
-
-import java.math.BigDecimal;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -30,10 +31,20 @@ public class IngredientCompositeBase extends Composite {
 	
 	public Logger logger = Logger.getLogger("IngredientCompositeLogger");
 	
+	public static final String strIngredientName = "INGREDIENT_NAME";
+	public static final String strIngredientDesc = "INGREDIENT_DESC";
+	public static final String strUnitPrice = "UNIT_PRICE";
+	public static final String strPackagePrice = "PACKAGE_PRICE";
+	public static final String strIngredientType = "INGREDIENT_TYPE";
+	public static final String strUnitOfMeasure = "UNIT_OF_MEASURE";
+	public static final String strPkgUnitOfMeasure = "PKG_UNIT_OF_MEASURE";
+	
+	
+	@SuppressWarnings("unused")
 	private DataBindingContext m_bindingContext;
 	private Text txtIngredientName;
 	private Text txtIngredientDescription;
-	private Text txtUnitPrice;
+	private Text txtUnitPrice; 
 	private Text txtPackagePrice;
 	private Combo cmbType;
 	private Combo cmbUom;
@@ -41,6 +52,7 @@ public class IngredientCompositeBase extends Composite {
 	private Button btnHasARecipe;
 	private boolean dirty = false;
 	private IngredientType ingredientTypes;
+	public static ModifyListener modifyListener;
 	
 	Ingredient ingredient = new Ingredient();
 	
@@ -58,6 +70,24 @@ public class IngredientCompositeBase extends Composite {
 	public IngredientCompositeBase(Composite parent, int style) {
 		super(parent, style);
 		
+		modifyListener = new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				switch((String)e.widget.getData()) {
+				case strIngredientName:
+				case strIngredientDesc:
+				case strUnitPrice:
+				case strPackagePrice:
+				case strIngredientType:
+				case strUnitOfMeasure:
+				case strPkgUnitOfMeasure:
+					setDirty(true);
+					break;
+				}
+			}
+		};
+		
 		setLayout(new GridLayout(4, false));
 		uom.add("ounce");
 		uom.add("Pound");
@@ -72,6 +102,8 @@ public class IngredientCompositeBase extends Composite {
 		txtIngredientName = new Text(this, SWT.BORDER);
 		txtIngredientName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		new Label(this, SWT.NONE);
+		txtIngredientName.setData(strIngredientName);
+		txtIngredientName.addModifyListener(modifyListener);
 		
 		Label lblDescription = new Label(this, SWT.NONE);
 		lblDescription.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -79,6 +111,8 @@ public class IngredientCompositeBase extends Composite {
 		
 		txtIngredientDescription = new Text(this, SWT.BORDER);
 		txtIngredientDescription.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
+		txtIngredientDescription.setData(strIngredientDesc);
+		txtIngredientDescription.addModifyListener(modifyListener);
 		
 		Label lblType = new Label(this, SWT.NONE);
 		lblType.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -87,6 +121,8 @@ public class IngredientCompositeBase extends Composite {
 		cmbType = new Combo(this, SWT.NONE);
 		cmbType.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		new Label(this, SWT.NONE);
+		cmbType.setData(strIngredientType);
+		cmbType.addModifyListener(modifyListener);
 		
 		Label lblRecipeUnitOf = new Label(this, SWT.NONE);
 		lblRecipeUnitOf.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -94,6 +130,8 @@ public class IngredientCompositeBase extends Composite {
 		
 		cmbUom = new Combo(this, SWT.NONE);
 		cmbUom.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		cmbUom.setData(strUnitOfMeasure);
+		cmbUom.addModifyListener(modifyListener);
 		// TODO: Add the fill code when the UOM class becomes available
 		
 		Label lblPackageUnitOf = new Label(this, SWT.NONE);
@@ -102,6 +140,8 @@ public class IngredientCompositeBase extends Composite {
 		
 		cmbPkgUom = new Combo(this, SWT.NONE);
 		cmbPkgUom.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		cmbPkgUom.setData(strPkgUnitOfMeasure);
+		cmbPkgUom.addModifyListener(modifyListener);
 		//Add call to populate list here.
 		
 		Label lblUnitPrice = new Label(this, SWT.NONE);
@@ -110,6 +150,8 @@ public class IngredientCompositeBase extends Composite {
 		
 		txtUnitPrice = new Text(this, SWT.BORDER);
 		txtUnitPrice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		txtUnitPrice.setData(strUnitPrice);
+		txtUnitPrice.addModifyListener(modifyListener);
 		
 		Label lblPackagePrice = new Label(this, SWT.NONE);
 		lblPackagePrice.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -117,6 +159,8 @@ public class IngredientCompositeBase extends Composite {
 		
 		txtPackagePrice = new Text(this, SWT.BORDER);
 		txtPackagePrice.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		txtPackagePrice.setData(strPackagePrice);
+		txtPackagePrice.addModifyListener(modifyListener);
 		
 		btnHasARecipe_1 = new Button(this, SWT.CHECK);
 		btnHasARecipe_1.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false, 1, 1));
@@ -202,6 +246,12 @@ public class IngredientCompositeBase extends Composite {
 	
 	public boolean isDirty() {
 		return dirty;
+	}
+	
+	private void setDirty(boolean b) {
+		dirty = true;		//TODO: The dirty flag in the composite. Do I need this?
+		IngredientEditor ce =  (IngredientEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+		ce.makeDirty(true);
 	}
 	
 	/**

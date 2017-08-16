@@ -49,6 +49,8 @@ public class IngredientEditor extends EditorPart {
 			provider.doSave();
 			// 5. Close the connection.
 			provider.closeConnection();
+			//TODO: Add new ingredient to the tree list: IngredientExplorerView
+			makeDirty(false);
 		} catch (SQLException e) {
 			javaLogger.log(Level.SEVERE, "An error occurred while trying to save an ingredient. \n " +
 				e.getErrorCode() + " " + e.getMessage() );
@@ -69,8 +71,12 @@ public class IngredientEditor extends EditorPart {
 
 	@Override
 	public boolean isDirty() {
-		// TODO: Implement change listeners on controls and set the dirty flag if changed.
 		return dirty;
+	}
+	
+	public void makeDirty(boolean b) {
+		dirty = true;
+		super.firePropertyChange(PROP_DIRTY);
 	}
 
 	@Override

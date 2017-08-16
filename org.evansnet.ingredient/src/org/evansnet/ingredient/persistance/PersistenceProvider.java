@@ -89,21 +89,21 @@ public class PersistenceProvider {
 	 */
 	private String buildInsertQuery(Ingredient i) {
 		StringBuilder sb = new StringBuilder("INSERT INTO ");
-		sb.append(db.getSchema() + "." + db.getDatabaseName());
+		sb.append(db.getSchema() + "." + "INGREDIENT");
 		sb.append(" VALUES( ");
 		sb.append(getNextID() + ","); 
-		sb.append("\"" + i.getIngredientName() + "\",");
-		sb.append("\"" + i.getIngredientDescription() + "\",");
-		sb.append("\"" + i.getStrUom() + "\",");
+		sb.append("\'" + i.getIngredientName() + "\',");
+		sb.append("\'" + i.getIngredientDescription() + "\',");
+		sb.append("\'" + "1" + "\',");	//TODO: Translate from value selected in combo.
 		sb.append(i.getPkgPrice() + ", ");
-		sb.append("\"" + i.getPkgUom() + "\",");
+		sb.append("\'" + "1" + "\',");	//TODO: Translate from value selected in combo.
 		sb.append( i.getPkgPrice() + ",");
 		
 		if (i.isRecipe()) {
 			sb.append(1 + ",");
 		}
 		sb.append(0 + " );");
-		javaLogger.log(Level.FINEST, "Insert query; " + sb.toString());
+		javaLogger.log(Level.INFO, "Insert query; " + sb.toString());
 		return sb.toString();
 	}
 	
