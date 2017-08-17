@@ -51,6 +51,7 @@ public class IngredientEditor extends EditorPart {
 			provider.closeConnection();
 			//TODO: Add new ingredient to the tree list: IngredientExplorerView
 			makeDirty(false);
+			super.firePropertyChange(PROP_DIRTY);
 		} catch (SQLException e) {
 			javaLogger.log(Level.SEVERE, "An error occurred while trying to save an ingredient. \n " +
 				e.getErrorCode() + " " + e.getMessage() );
