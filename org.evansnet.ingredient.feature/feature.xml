@@ -3,14 +3,15 @@
       id="org.evansnet.ingredient"
       label="Ingredient"
       version="1.0.0.qualifier"
-      provider-name="Evansnet">
+      provider-name="Evansnet"
+      os="linux,win32">
 
    <description url="http://www.example.com/description">
       Contributes capabilities that allow the creation and edit of ingredients. Ingredients, in this context, are foodstuffs used for creating recipes and meals.
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      (c) Copyright Daniel C. Evans All rights reserved. 2017
+      © Copyright Daniel C. Evans All rights reserved. 2017
    </copyright>
 
    <license url="http://www.example.com/license">
@@ -18,9 +19,17 @@
    </license>
 
    <requires>
-      <import plugin="org.evansnet.dataconnector"/>
-      <import plugin="org.evansnet.measure"/>
-      <import plugin="org.evansnet.process"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.evansnet.dataconnector" version="1.0.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.core.databinding"/>
+      <import plugin="org.eclipse.core.databinding.beans"/>
+      <import plugin="org.eclipse.core.databinding.observable"/>
+      <import plugin="org.eclipse.core.databinding.property"/>
+      <import plugin="org.eclipse.jface.databinding"/>
+      <import plugin="com.ibm.icu"/>
+      <import plugin="org.eclipse.ui.workbench"/>
    </requires>
 
    <plugin
@@ -29,6 +38,13 @@
          ws="gtk,win32"
          nl="en_US"
          arch="x86,x86_64"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.evansnet.dataconnector"
          download-size="0"
          install-size="0"
          version="0.0.0"
