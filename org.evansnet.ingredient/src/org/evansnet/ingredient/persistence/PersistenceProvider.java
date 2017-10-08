@@ -1,9 +1,10 @@
-package org.evansnet.ingredient.persistance;
+package org.evansnet.ingredient.persistence;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.swt.SWT;
@@ -15,7 +16,7 @@ import org.evansnet.dataconnector.internal.core.Host;
 import org.evansnet.dataconnector.internal.core.IHost;
 import org.evansnet.dataconnector.ui.ConnectionDialog;
 import org.evansnet.ingredient.model.Ingredient;
-import org.evansnet.ingredient.persistance.IngredientPersistenceAction;
+import org.evansnet.ingredient.persistence.IngredientPersistenceAction;
 
 /**
  * Base class for the ingredient persistence mechanism.
@@ -40,15 +41,31 @@ public class PersistenceProvider {
 	ConnectionDialog connectDialog;
 	Connection conn;
 	Ingredient ingredient;
-	ProgressBar progress;
+	ProgressBar progress;		//TODO: implement the progress bar for connection operation.
+	
+	public PersistenceProvider(Shell s) {
+		connectDialog = new ConnectionDialog(s, SWT.NONE);	
+		host = new Host();
+		db = new DBMS();	
+	}
 	
 	public PersistenceProvider(Shell shell, Ingredient i, IngredientPersistenceAction a) {
-		connectDialog = new ConnectionDialog(shell, SWT.NONE);	
-		host = new Host();
-		db = new DBMS();
+		this(shell);
 		ingredient = i;
 	}
 	
+	public IHost getHost() {
+		return host;
+	}
+
+	public IDatabase getDb() {
+		return db;
+	}
+
+	public Connection getConn() {
+		return conn;
+	}
+
 	/**
 	 * Provides a way to get the connection to the database. Shows the 
 	 * connector dialog and persists the connection info to the repository.
@@ -66,20 +83,41 @@ public class PersistenceProvider {
 				rows + " Rows affected.");
 	}
 	
-	public void doUpdate() throws SQLException {
+	/**
+	 * Fetch the ingredient(s) with the name provided
+	 * @param name The name of the ingredient
+	 * @return A list of ingredients with the name provided.
+	 */
+	public Map<Integer, Ingredient> doFetch(String name) {
+		//TODO: Ingredient persistence: Fetch the ingredient(s) with the name provided 
+		return null;
+	}
+	
+	/**
+	 * Return the ingredient with the ID = int
+	 * @param id An integer value representing the ingrediennt ID.
+	 * @return The ingredient with that ID, or null if it doesn't exist.
+	 */
+	public Ingredient doFetch(int id) throws SQLException {
+		return null;
+	}
+	
+	public void doUpdate(int id) throws SQLException {
 		//TODO: Update the ingredient (update query).
 	}
 	
-	public void doDelete() throws SQLException {
+	public void doDelete(int id) throws SQLException {
 		//TODO: Delete the ingredient (delete query).
 	}
 	
 	public void closeConnection() throws SQLException {
 		this.closeConnection(conn);
+		javaLogger.log(Level.INFO, "Database connection closed.");
 	}
 	
 	private void closeConnection(Connection c) throws SQLException {
 		c.close();
+		javaLogger.log(Level.INFO, "Database connection closed.");
 	}
 	
 	/**

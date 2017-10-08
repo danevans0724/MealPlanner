@@ -39,7 +39,7 @@
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
-            targetID="*">
+            targetID="org.evansnet.ingredient.perspective">
          <view
                id="org.evansnet.ingredient.ui.ingredientexplorerview"
                minimized="false"
@@ -78,6 +78,24 @@
                   id="org.evansnet.ingredient.ui.main.menu.save"
                   label="Save"
                   mnemonic="&amp;s"
+                  style="push">
+            </command>
+         </menu>
+         <menu
+               label="Window">
+            <command
+                  commandId="org.eclipse.ui.window.preferences"
+                  style="push">
+            </command>
+         </menu>
+         <menu
+               commandId="org.eclipse.ui.help.helpContents"
+               id="org.evansnet.ingredient.help"
+               label="Help">
+            <command
+                  commandId="org.eclipse.ui.help.aboutAction"
+                  label="About"
+                  mnemonic="&amp;b"
                   style="push">
             </command>
          </menu>
@@ -128,6 +146,39 @@
          point="org.eclipse.ui.helpSupport">
       <config
             class="org.evansnet.ingredient.AbstractHelpUI">
+      </config>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.evansnet.ingredient.ui.IngredientPreferences"
+            id="org.evansnet.ingredient.preferences"
+            name="Ingredients">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.evansnet.ingredient.persistence.preferences.PreferenceInitializer">
+      </initializer>
+      <modifier
+            class="org.evansnet.ingredient.persistence.IngredientPreferenceModifyListener">
+      </modifier>
+      <scope
+            class="org.evansnet.ingredient.ui.IngredientPreferences"
+            name="Ingredient">
+      </scope>
+   </extension>
+   <extension
+         point="org.eclipse.ui.helpSupport">
+      <config
+            class="org.evansnet.ingredient.AbstractHelpUI1">
+      </config>
+   </extension>
+   <extension
+         point="org.eclipse.ui.helpSupport">
+      <config
+            class="org.evansnet.ingredient.AbstractHelpUI2">
       </config>
    </extension>
 

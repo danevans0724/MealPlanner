@@ -1,4 +1,4 @@
-package org.evansnet.ingredient.persistance;
+package org.evansnet.ingredient.persistence;
 
 public enum IngredientPersistenceAction { 
 		Ingredient_Save,

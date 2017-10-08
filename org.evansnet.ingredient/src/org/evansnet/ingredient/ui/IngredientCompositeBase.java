@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Button;
 
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.model.IngredientType;
+import org.evansnet.ingredient.model.Measures;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -278,16 +279,10 @@ public class IngredientCompositeBase extends Composite {
 	private void populateLists() {
 		//TODO: Write code to get list contents from persistent storage and 
 		//      then remove this temporary method.
-		List<String> units = new ArrayList<String>();
-		units.add("ounces");
-		units.add("pounds");
-		units.add("grams");
-		units.add("cups");
-		units.add("fl ounces");
-		units.add("each");
-		units.add("other");
+		Measures measures = new Measures();
+		ArrayList<String> units = measures.getMeasures();
 		
-		for(String s : units) {
+		for (String s : units) {
 			cmbUom.add(s);
 			cmbPkgUom.add(s);
 		}
@@ -300,6 +295,7 @@ public class IngredientCompositeBase extends Composite {
 		types.add("Baking");
 		types.add("Frozen foods");
 		types.add("Fruits & vegetables");
+		types.add("Spices & herbs");
 		
 		for(String t : types) {
 			cmbType.add(t);

@@ -1,8 +1,8 @@
-package org.evansnet.ingredient.persistance;
+package org.evansnet.ingredient.persistence;
 
 import org.eclipse.swt.widgets.Shell;
 import org.evansnet.ingredient.model.Ingredient;
-import org.evansnet.ingredient.persistance.PersistenceProvider;
+import org.evansnet.ingredient.persistence.PersistenceProvider;
 
 /**
  * Provides methods for fetching, saving, updating, and deleting 
