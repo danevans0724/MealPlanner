@@ -16,10 +16,10 @@ import org.evansnet.ingredient.model.Ingredient;
  */
 public class IngredientRepository {
 	
-	String connStr;				//The JDBC connection string for the repository.
-	DBMS repoConnection;		//A connection to the ingredient repository table.
-	String repoName;
-	String repoVersion;
+	String 	connStr;				//The JDBC connection string for the repository.
+	DBMS 	repoConnection;		//A connection to the ingredient repository table.
+	String 	repoName;
+	String 	repoVersion;
 	boolean isDefault;
 	
 	public IngredientRepository() {

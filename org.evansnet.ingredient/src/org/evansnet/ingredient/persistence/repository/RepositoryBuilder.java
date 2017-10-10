@@ -18,6 +18,15 @@ import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
  * A class that allows for the creation of a repository in a database and 
  * the management of existing repositories.
  * 
+ * The repository builder 
+ * Allows the user to define the connection to a database for the 
+ * purpose of creating a repository.
+ * 
+ * Creates the repository table in the database selected.
+ * 
+ * Persists the connection information (connection string) to the 
+ * application preferences.
+ *  
  * @author Dan Evans
  *
  */
@@ -28,35 +37,33 @@ public class RepositoryBuilder {
 	private String 		sqlCreate;		//Create table statement
 	private String 		connStr;		//The connection string provided by the data connector.
 	private Connection 	conn;			//The database connection provided by the data connector.
+	private IngredientRepository repo;	//The newly created ingredient repository.
 	
-	/*
-	 * The repository builder 
-	 * Allows the user to define the connection to a database for the 
-	 * purpose of creating a repository.
-	 * 
-	 * Creates the repository table in the database selected.
-	 * 
-	 * Persists the connection information (connection string) to the 
-	 * application preferences.
-	 *  
-	 */
-	
-	private RepositoryBuilder() {
+	public RepositoryBuilder() {
 		// This constructor gets a connection dialog and subsequently the connection.
+		conn = buildConnection();
 	}
 	
-	private RepositoryBuilder(String strConn) {
+	public RepositoryBuilder(String strConn) {
 		//The constructor builds the repository if given a valid connection string as a parameter.
 		DBType dbType = parseForDBMS(strConn);
 		try {
 			declareDbType(dbType);
 		} catch (ClassNotFoundException | SQLException e) {
-			// TODO Auto-generated catch block
+			// TODO Enhance this exception handler and fail gracefully.
 			e.printStackTrace();
 		}
-		
 	}
 	
+	/**
+	 * Used when the builder is supplied a connection string. After the string is parsed,
+	 * and the type of DBMS is determined, then the database is constructed based on the 
+	 * DBMS types supported by the org.evansnet.dataconnector plug-in.
+	 * 
+	 * @param dbType
+	 * @throws ClassNotFoundException
+	 * @throws SQLException
+	 */
 	private void declareDbType(DBType dbType) throws ClassNotFoundException, SQLException {
 		switch(dbType) {
 		case MS_SQLSrv :
@@ -71,11 +78,19 @@ public class RepositoryBuilder {
 		}
 	}
 
-	public String createRepository() {
+	public IngredientRepository createRepository() {
 		//TODO: Implement public call to the repository builder.
-		return connStr;
+		new RepositoryBuilder();
+		return new IngredientRepository();
 	}
 	
+	/**
+	 * Creates an ingredient repository given a valid connection string for a 
+	 * supported DBMS system.
+	 * 
+	 * @param strConn
+	 * @return An Ingredient repository object
+	 */
 	public String createRepository(String strConn) {
 		new RepositoryBuilder(strConn);
 		return connStr;
@@ -83,7 +98,9 @@ public class RepositoryBuilder {
 	
 	/**
 	 * Uses the ingredient persistence provider to create a connection definition and to 
-	 * return the connection to the database. 
+	 * return the connection to the database. This method also sets the IHost type, 
+	 * IDatabase type and connection string for the repository database.
+	 * 
 	 * @return A JDBC connection to the database. 
 	 */
 	public Connection buildConnection() {
@@ -114,13 +131,18 @@ public class RepositoryBuilder {
 	 * method assumes a JDBC string format of:
 	 * jdbc:<DBMS type>:/host:port or a variant consistent with the DBMS systems 
 	 * that are supported.
-	 * @param c A valid JDBC connection string
+	 * 
+	 * @param c  A valid JDBC connection string for a supported DBMS.
 	 * @return A DBMS manufacturer/type like DB2, MS SQL Server etc. 
 	 */
 	private DBType parseForDBMS(String c) {
-		DBType type; 
-		
-		return null;
+		DBType type = null; 
+		if (c.contains("jdbc:mysql")) {					//Based on MySQL connector driver.
+			type = DBType.MySQL;
+		} else if (c.contains("jdbc:sqlserver")) {		//Based on Microsoft driver.
+			type = DBType.MS_SQLSrv;
+		}
+		return type;
 	}
 
 	public IHost getHost() {
