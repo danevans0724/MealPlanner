@@ -2,6 +2,8 @@ package org.evansnet.ingredient.persistence.repository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.evansnet.dataconnector.internal.core.IHost;
 import org.evansnet.dataconnector.internal.dbms.MySQLConnection;
@@ -32,6 +34,9 @@ import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
  */
 public class RepositoryBuilder {
 	
+	public static final String class_name = "org.evansnset.ingredient.persistence.repository.RepositoryBuilder";
+	public static Logger javaLogger = Logger.getLogger(class_name);
+	
 	private IHost	 	host;			//The database host machine.
 	private IDatabase 	database;
 	private String 		sqlCreate;		//Create table statement
@@ -41,18 +46,18 @@ public class RepositoryBuilder {
 	
 	public RepositoryBuilder() {
 		// This constructor gets a connection dialog and subsequently the connection.
-		conn = buildConnection();
+		host = null;
+		database = null;
+		sqlCreate = null;
+		connStr = null;
+		conn = null;
+		repo = new IngredientRepository();
 	}
 	
 	public RepositoryBuilder(String strConn) {
 		//The constructor builds the repository if given a valid connection string as a parameter.
-		DBType dbType = parseForDBMS(strConn);
-		try {
-			declareDbType(dbType);
-		} catch (ClassNotFoundException | SQLException e) {
-			// TODO Enhance this exception handler and fail gracefully.
-			e.printStackTrace();
-		}
+		this();
+		connStr = strConn;
 	}
 	
 	/**
@@ -68,9 +73,11 @@ public class RepositoryBuilder {
 		switch(dbType) {
 		case MS_SQLSrv :
 			database = new SQLSrvConnection();
+			//TODO: Set the host based on the connection string content
 			break;
 		case MySQL :
 			database = new MySQLConnection();
+			//TODO: Set the host based on the connection string content
 			break;
 		default:
 			database = null;
@@ -78,22 +85,45 @@ public class RepositoryBuilder {
 		}
 	}
 
+
+	/**
+	 * Creates an ingredient repository for a supported DBMS system. If the 
+	 * builder's constructor is given a valid JDBC connection string, the 
+	 * method creates the repository table in that DBMS. If no connection 
+	 * string is given, the method uses the data connector to define the 
+	 * host, and DBMS in which to build the table.
+	 * 
+	 * @return An Ingredient repository object
+	 */	
 	public IngredientRepository createRepository() {
-		//TODO: Implement public call to the repository builder.
-		new RepositoryBuilder();
-		return new IngredientRepository();
+		if (connStr == null) {
+			conn = buildConnection();
+			} else {
+			DBType dbType = parseForDBMS(connStr);
+			try {
+				declareDbType(dbType);
+			} catch (ClassNotFoundException | SQLException e) {
+				// TODO Enhance this exception handler and fail gracefully.
+				e.printStackTrace();
+			}			
+		}
+		repo.setConnectStr(database.getConnectionString()); 	
+		buildTable(conn);
+		try {
+			conn.close();
+		} catch (SQLException e) {
+			javaLogger.log(Level.FINEST, "Failed to close the repository database!");
+			//TODO: Pop a messagebox.
+			e.printStackTrace();
+		}
+		persistConn();		// Store the connection string in the plug-in preferences.
+		return repo;
 	}
 	
-	/**
-	 * Creates an ingredient repository given a valid connection string for a 
-	 * supported DBMS system.
-	 * 
-	 * @param strConn
-	 * @return An Ingredient repository object
-	 */
-	public String createRepository(String strConn) {
-		new RepositoryBuilder(strConn);
-		return connStr;
+	public IngredientRepository createRepository(String strConn) {
+		connStr = strConn;
+		repo = createRepository();
+		return repo;
 	}
 	
 	/**
@@ -103,7 +133,7 @@ public class RepositoryBuilder {
 	 * 
 	 * @return A JDBC connection to the database. 
 	 */
-	public Connection buildConnection() {
+	private Connection buildConnection() {
 		PersistenceProvider persistor = new PersistenceProvider(
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 		persistor.showConnDialog();
@@ -116,6 +146,8 @@ public class RepositoryBuilder {
 	
 	private void buildTable(Connection c) {
 		//TODO: Implement code to run the script to create the ingredient table. 
+		StringBuilder sb = new StringBuilder("CREATE TABLE ");
+		String schema = database.getSchema();
 	}
 	
 	/**
@@ -172,5 +204,4 @@ public class RepositoryBuilder {
 	public IDatabase getDatabase() {
 		return database;
 	}
-	
 }
