@@ -2,13 +2,15 @@ package org.evansnet.ingredient.persistence.repository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.evansnet.dataconnector.internal.core.IHost;
 import org.evansnet.dataconnector.internal.dbms.MySQLConnection;
 import org.evansnet.dataconnector.internal.dbms.SQLSrvConnection;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
@@ -37,7 +39,6 @@ public class RepositoryBuilder {
 	public static final String class_name = "org.evansnset.ingredient.persistence.repository.RepositoryBuilder";
 	public static Logger javaLogger = Logger.getLogger(class_name);
 	
-	private IHost	 	host;			//The database host machine.
 	private IDatabase 	database;
 	private String 		sqlCreate;		//Create table statement
 	private String 		connStr;		//The connection string provided by the data connector.
@@ -46,7 +47,6 @@ public class RepositoryBuilder {
 	
 	public RepositoryBuilder() {
 		// This constructor gets a connection dialog and subsequently the connection.
-		host = null;
 		database = null;
 		sqlCreate = null;
 		connStr = null;
@@ -70,14 +70,32 @@ public class RepositoryBuilder {
 	 * @throws SQLException
 	 */
 	private void declareDbType(DBType dbType) throws ClassNotFoundException, SQLException {
+		int h, endDB;
 		switch(dbType) {
 		case MS_SQLSrv :
 			database = new SQLSrvConnection();
-			//TODO: Set the host based on the connection string content
+			
+			//We know the format of the connection string so set the host based on the connection string content
+			h = connStr.indexOf("://") + 3;
+			endDB = connStr.indexOf(":", h);
+			database.getHost().setHostName(connStr.substring(h, endDB));
+			h = connStr.indexOf("/", h) + 1;						// Find the database name.
+			endDB = connStr.indexOf(";", h); 
+			if (endDB < 0) {
+				database.setDatabaseName(connStr.substring(h));
+			} else {
+				database.setDatabaseName(connStr.substring(h, endDB));
+			}
 			break;
+			
 		case MySQL :
 			database = new MySQLConnection();
-			//TODO: Set the host based on the connection string content
+			//jdbc:mysql://<<Host>>:3306/<<database>>
+			h = connStr.indexOf("://") + 3;
+			database.getHost().setHostName(connStr.substring(h, connStr.indexOf(":", h) - 1));
+			h = connStr.indexOf("/", h) + 1;						// Find the database name.
+			endDB = connStr.indexOf(";", h) - 1 ; 
+				database.setDatabaseName(connStr.substring(h, endDB));
 			break;
 		default:
 			database = null;
@@ -95,7 +113,7 @@ public class RepositoryBuilder {
 	 * 
 	 * @return An Ingredient repository object
 	 */	
-	public IngredientRepository createRepository() {
+	public IngredientRepository createRepository() throws SQLException {
 		if (connStr == null) {
 			conn = buildConnection();
 			} else {
@@ -103,7 +121,9 @@ public class RepositoryBuilder {
 			try {
 				declareDbType(dbType);
 			} catch (ClassNotFoundException | SQLException e) {
-				// TODO Enhance this exception handler and fail gracefully.
+				showErrMessageBox("Create Repository Error!", 
+						"An error occurred while creating the repository table: " + e.getMessage() +
+						"\n See the log for more information.");
 				e.printStackTrace();
 			}			
 		}
@@ -113,14 +133,16 @@ public class RepositoryBuilder {
 			conn.close();
 		} catch (SQLException e) {
 			javaLogger.log(Level.FINEST, "Failed to close the repository database!");
-			//TODO: Pop a messagebox.
+			showErrMessageBox("Database Close Error!", 
+					"An error occurred while closing the repository database: " + e.getMessage() +
+					"\n See the log for more information.");
 			e.printStackTrace();
 		}
 		persistConn();		// Store the connection string in the plug-in preferences.
 		return repo;
 	}
 	
-	public IngredientRepository createRepository(String strConn) {
+	public IngredientRepository createRepository(String strConn) throws SQLException {
 		connStr = strConn;
 		repo = createRepository();
 		return repo;
@@ -138,16 +160,47 @@ public class RepositoryBuilder {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 		persistor.showConnDialog();
 		database = persistor.getDb();
-		host = persistor.getHost();
 		connStr = database.getConnectionString();
 		conn = persistor.getDb().getConnection();
 		return conn;
 	}
 	
-	private void buildTable(Connection c) {
-		//TODO: Implement code to run the script to create the ingredient table. 
+	private void buildTable(Connection c) throws SQLException {
+		//First build the create table statement.
 		StringBuilder sb = new StringBuilder("CREATE TABLE ");
-		String schema = database.getSchema();
+		sb.append("\"" + database.getSchema() + "\".\"INGREDIENT\" (");		//Repository table name is always INGREDIENT
+		sb.append("   ID BIGINT PRIMARY KEY, ");
+		sb.append("   ING_NAME VARCHAR(40) NOT NULL,");
+		sb.append("   ING_DESC VARCHAR(80) NULL,");
+		sb.append("   UNIT_OF_MEASURE BIGINT NULL,");
+		sb.append("   PKG_UOM BIGINT NULL,");
+		sb.append("   UNIT_PRICE DECIMAL(6,2) NULL,");
+		sb.append("	  PKG_PRICE DECIMAL (6,2) NULL,");
+		sb.append("	  IS_RECIPE ");
+		
+		if (database.getDBMS() == DBType.MS_SQLSrv) {
+			sb.append("BIT DEFAULT 0 );" );
+		} else if (database.getDBMS() == DBType.MySQL) {
+			sb.append("BOOLEAN DEFAULT FALSE);");
+		}
+		
+		sqlCreate = sb.toString();
+		
+		if (conn == null || conn.isClosed()) {
+			conn = database.connect(connStr);
+			if (conn.getSchema() == null) {
+				conn.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.
+			}
+		}
+		
+		Statement st = conn.createStatement();
+		try {
+			st.executeUpdate(sqlCreate);
+		} catch (SQLException e) {
+			javaLogger.log(Level.SEVERE, "An error occurred while creating the repository table. ");
+			showErrMessageBox("Create Repository Table Error",
+					"The create table statement failed to create the ingredient repository table!");
+		}
 	}
 	
 	/**
@@ -176,15 +229,21 @@ public class RepositoryBuilder {
 		}
 		return type;
 	}
-
-	public IHost getHost() {
-		return host;
+	
+	/**
+	 * Shows an error message box given the message provided.
+	 * @return
+	 */
+	private void showErrMessageBox(String t, String msg) {
+		MessageBox theMsg = new MessageBox(
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
+		theMsg.setText(t);
+		theMsg.setMessage(msg);
+		theMsg.open();		
 	}
 
-	public void setHost(IHost host) {
-		this.host = host;
-	}
-
+	// Getters and Setters 
+	
 	public String getConnStr() {
 		return connStr;
 	}

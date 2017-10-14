@@ -63,7 +63,7 @@ public class PersistenceProvider {
 	}
 
 	public Connection getConn() {
-		return conn;
+		return db.getConnection();
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class PersistenceProvider {
 	 */
 	public void showConnDialog() {
 		db = (IDatabase)connectDialog.open();
-		conn = db.getConnection();	
+//		conn = db.getConnection();	
 	}
 	
 	public void doSave() throws SQLException {
