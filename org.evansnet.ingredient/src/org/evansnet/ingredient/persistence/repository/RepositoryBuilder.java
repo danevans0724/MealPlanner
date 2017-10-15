@@ -92,10 +92,14 @@ public class RepositoryBuilder {
 			database = new MySQLConnection();
 			//jdbc:mysql://<<Host>>:3306/<<database>>
 			h = connStr.indexOf("://") + 3;
-			database.getHost().setHostName(connStr.substring(h, connStr.indexOf(":", h) - 1));
+			database.getHost().setHostName(connStr.substring(h, connStr.indexOf(":", h)));
 			h = connStr.indexOf("/", h) + 1;						// Find the database name.
-			endDB = connStr.indexOf(";", h) - 1 ; 
+			endDB = connStr.indexOf(";", h); 
+			if (endDB < 0) {
+				database.setDatabaseName(connStr.substring(h));
+			} else {
 				database.setDatabaseName(connStr.substring(h, endDB));
+			}
 			break;
 		default:
 			database = null;
@@ -187,6 +191,7 @@ public class RepositoryBuilder {
 		sqlCreate = sb.toString();
 		
 		if (conn == null || conn.isClosed()) {
+			//TODO: Get credentials for the connection if not already defined.
 			conn = database.connect(connStr);
 			if (conn.getSchema() == null) {
 				conn.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.

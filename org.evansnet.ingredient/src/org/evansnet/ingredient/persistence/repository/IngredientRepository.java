@@ -1,10 +1,12 @@
 package org.evansnet.ingredient.persistence.repository;
 
-import java.util.List;
+import java.util.AbstractMap;
+import java.util.HashMap;
 
 import org.evansnet.dataconnector.internal.core.DBMS;
 import org.evansnet.dataconnector.internal.core.Host;
 import org.evansnet.ingredient.model.Ingredient;
+import org.evansnet.ingredient.persistence.PersistenceProvider;
 
 /**
  * Implements the usage of the ingredient repository. 
@@ -29,8 +31,9 @@ public class IngredientRepository {
 		isDefault = false;
 	}
 	
-	public List<Ingredient> getIngredients() {
+	public HashMap<Integer, Ingredient> getTreeIngredients() {
 		//TODO: provide a list of ingredients from the repository table.
+		PersistenceProvider provider = new PersistenceProvider();
 		return null;
 	}
 	

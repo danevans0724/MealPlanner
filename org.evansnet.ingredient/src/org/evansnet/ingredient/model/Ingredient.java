@@ -12,6 +12,7 @@ import java.math.BigDecimal;
  */
 public class Ingredient {
 	
+	int id;
 	String ingredientName;
 	String ingredientDescription;
 	String strUom;			// A temporary class for test. TODO: Replace with UOM when written.
@@ -26,6 +27,14 @@ public class Ingredient {
 			new PropertyChangeSupport(this);
 	
 	// Getters & setters
+	public int getID() {
+		return id;
+	}
+	
+	public void setID(int i) {
+		id = i;
+	}
+	
 	public String getIngredientName() {
 		return ingredientName;
 	}

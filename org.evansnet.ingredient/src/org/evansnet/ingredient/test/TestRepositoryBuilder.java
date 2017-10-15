@@ -14,7 +14,7 @@ import org.junit.Test;
 public class TestRepositoryBuilder {
 	
 	String conn1 = "jdbc:sqlserver://localhost:1433;database=DCEDB01;user=devans;password=3xnhlcup";	//SQL Server test
-	String conn2 = "jdbc:mysql://localhost:3306/DCEDB01";	//MySQL test
+	String conn2 = "jdbc:mysql://localhost:3306/INGREDIENT";	//MySQL test
 	DBType typeSQLSrv = DBType.MS_SQLSrv;
 	DBType typeMySql  = DBType.MySQL;
 	IngredientRepository repo;
@@ -32,11 +32,11 @@ public class TestRepositoryBuilder {
 	}
 
 	@Test
-	public void testCreateRepositoryWithString() {
+	public void testMySQLCreateRepositoryWithString() {
 		DBType type = null;
-		builder = new RepositoryBuilder(conn1);
+		builder = new RepositoryBuilder(conn2);
 		try {
-			builder.createRepository(conn1);		//Test build SQL Server
+			builder.createRepository(conn2);		//Test build SQL Server
 			type = builder.getDatabase().getDBMS();
 			assertTrue(type == DBType.MS_SQLSrv);
 		} catch (SQLException e) {
@@ -45,4 +45,18 @@ public class TestRepositoryBuilder {
 		}
 	}
 	
+	@Test
+	public void testSQLServerCreateRepositoryWithString() {
+		DBType type = null;
+		builder = new RepositoryBuilder(conn1);
+		try {
+			builder.createRepository(conn1);		//Test build SQL Server
+			type = builder.getDatabase().getDBMS();
+			assertTrue(type == DBType.MySQL);
+		} catch (SQLException e) {
+			fail("Could not create Ingredient repository table!\n" );
+			e.printStackTrace();
+		}
+		
+	}
 }

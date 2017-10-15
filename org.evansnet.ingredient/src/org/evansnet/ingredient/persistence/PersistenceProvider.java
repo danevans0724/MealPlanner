@@ -43,10 +43,14 @@ public class PersistenceProvider {
 	Ingredient ingredient;
 	ProgressBar progress;		//TODO: implement the progress bar for connection operation.
 	
-	public PersistenceProvider(Shell s) {
-		connectDialog = new ConnectionDialog(s, SWT.NONE);	
+	public PersistenceProvider() {
 		host = new Host();
-		db = new DBMS();	
+		db = new DBMS();			
+	}
+	
+	public PersistenceProvider(Shell s) {
+		this();
+		connectDialog = new ConnectionDialog(s, SWT.NONE);	
 	}
 	
 	public PersistenceProvider(Shell shell, Ingredient i, IngredientPersistenceAction a) {
@@ -95,7 +99,7 @@ public class PersistenceProvider {
 	
 	/**
 	 * Return the ingredient with the ID = int
-	 * @param id An integer value representing the ingrediennt ID.
+	 * @param id An integer value representing the ingredient ID.
 	 * @return The ingredient with that ID, or null if it doesn't exist.
 	 */
 	public Ingredient doFetch(int id) throws SQLException {
