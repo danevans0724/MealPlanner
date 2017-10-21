@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Button;
 public class IngredientPreferences extends PreferencePage implements IWorkbenchPreferencePage {
 	
 	private Text txtRepo;
+	private Text txtUserId;
+	private Text txtPassword;
 	Button btnRepoConn;
 	IPreferenceStore prefStore;
 
@@ -41,15 +43,38 @@ public class IngredientPreferences extends PreferencePage implements IWorkbenchP
 	@Override
 	public Control createContents(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
-		container.setLayout(new GridLayout(1, false));
+		container.setLayout(new GridLayout(4, false));
 		
 		Label lblIngredientRepositoryConnection = new Label(container, SWT.NONE);
 		lblIngredientRepositoryConnection.setText("Ingredient repository connection string;");
+		lblIngredientRepositoryConnection.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 3, 1));
+		new Label(container, SWT.NONE);
 		
 		txtRepo = new Text(container, SWT.BORDER);
-		GridData gd_txtRepo = new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1);
+		GridData gd_txtRepo = new GridData(SWT.LEFT, SWT.CENTER, true, false, 4, 1);
 		gd_txtRepo.widthHint = 340;
 		txtRepo.setLayoutData(gd_txtRepo);
+		
+		Label lblcHeader = new Label(container, SWT.NONE);
+		lblcHeader.setText("Repository Credentials:");
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		
+		Label lblUserId = new Label(container, SWT.NONE);
+		lblUserId.setText("User ID: ");
+		
+		txtUserId = new Text(container, SWT.BORDER);
+		txtUserId.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		
+		Label lblPassword = new Label(container, SWT.NONE);
+		lblPassword.setText("Password: ");
+		
+		txtPassword = new Text(container, SWT.BORDER | SWT.PASSWORD);
+		txtPassword.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		
 		
 		btnRepoConn = new Button(container, SWT.NONE);
 		btnRepoConn.setToolTipText("Create a connect definition");
@@ -71,11 +96,9 @@ public class IngredientPreferences extends PreferencePage implements IWorkbenchP
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-			
+			}			
 		});
+		new Label(container, SWT.NONE);
 		
 		initializeValues();
 		
@@ -117,15 +140,21 @@ public class IngredientPreferences extends PreferencePage implements IWorkbenchP
 	
 	private void initializeValues() {
 		txtRepo.setText(prefStore.getString(PreferenceConstants.PRE_REPO_CONN_STR));
+		txtUserId.setText(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID));
+		txtPassword.setText(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD));
 	}
 	
 	private void restoreDefaults() {
 		//Set the value in the control to the default. Warning dialog??
 		txtRepo.setText(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_CONN_STR));
+		txtUserId.setText(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_USER_ID));
+		txtPassword.setText(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_USER_PWD));
 	}
 	
 	private void savePreferences() {
 		prefStore.setValue(PreferenceConstants.PRE_REPO_CONN_STR, txtRepo.getText());
+		prefStore.setValue(PreferenceConstants.PRE_REPO_USER_ID, txtUserId.getText());
+		prefStore.setValue(PreferenceConstants.PRE_REPO_USER_PWD, txtPassword.getText());
 	}
 
 	private boolean doTestRepositoryConn() {

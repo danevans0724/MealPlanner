@@ -3,6 +3,7 @@ package org.evansnet.ingredient.persistence.repository;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -85,6 +86,7 @@ public class RepositoryBuilder {
 				database.setDatabaseName(connStr.substring(h));
 			} else {
 				database.setDatabaseName(connStr.substring(h, endDB));
+				extractCredentials(connStr.substring(h,endDB));
 			}
 			break;
 			
@@ -170,6 +172,10 @@ public class RepositoryBuilder {
 	}
 	
 	private void buildTable(Connection c) throws SQLException {
+		if (database.getSchema() == null) {
+			conn.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.
+		}
+		
 		//First build the create table statement.
 		StringBuilder sb = new StringBuilder("CREATE TABLE ");
 		sb.append("\"" + database.getSchema() + "\".\"INGREDIENT\" (");		//Repository table name is always INGREDIENT
@@ -193,9 +199,6 @@ public class RepositoryBuilder {
 		if (conn == null || conn.isClosed()) {
 			//TODO: Get credentials for the connection if not already defined.
 			conn = database.connect(connStr);
-			if (conn.getSchema() == null) {
-				conn.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.
-			}
 		}
 		
 		Statement st = conn.createStatement();
@@ -240,11 +243,73 @@ public class RepositoryBuilder {
 	 * @return
 	 */
 	private void showErrMessageBox(String t, String msg) {
-		MessageBox theMsg = new MessageBox(
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
-		theMsg.setText(t);
-		theMsg.setMessage(msg);
-		theMsg.open();		
+		try {
+			MessageBox theMsg = new MessageBox(
+						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
+			theMsg.setText(t);
+			theMsg.setMessage(msg);
+			theMsg.open();
+		} catch (Exception e) {
+			javaLogger.log(Level.SEVERE, "Unable to get workbench: ", class_name);
+			e.printStackTrace();
+		}		
+	}
+	
+	/**
+	 * Called by declareDbType which passes a string that may consist of
+	 * a user id and a password. Extract the user id and password and set them
+	 * into this object's credential object and then into the database object's
+	 * credentials object.
+	 * @param s
+	 */
+	private boolean extractCredentials(String s) throws SQLException {
+//		if (database == null) {
+//			return false;
+//		}
+		ArrayList<String> cStr = new ArrayList<String>();
+		cStr.add("user");
+		cStr.add("password");
+		try {
+			for (String c : cStr) {
+				if (s.contains(c)) {
+					int start = s.indexOf(c);
+					int end = s.indexOf(";", start) > 0 ? s.indexOf(";", start) : s.length();
+					if (c.equals("user")) {
+						start = start + 5;
+						database.getCredentials().setUserID(s.substring(start, end));
+						javaLogger.log(Level.INFO, "Setting user ID " + s.substring(start, end));
+						continue;
+					} else {
+						start = start + 9;
+						database.getCredentials().setPassword(s.substring(start, end));
+//						javaLogger.log(Level.INFO, "Setting password " + s.substring(start, end));
+						continue;
+					}
+				} else {
+					return false;
+				}
+			}		
+		} catch (StringIndexOutOfBoundsException ob) {
+			return false;
+		} catch(Exception e) {
+			javaLogger.log(Level.WARNING, "An exception occurred when trying to get credentials" 
+					+ " from the string provided. \n");
+			e.printStackTrace(); 
+			throw new SQLException(e);
+		}
+		return true;
+	}
+	
+	// public method to facilitate JUnit test.
+	public String credentialExtractTest(String s) throws ClassNotFoundException, SQLException {
+		try {
+			if (extractCredentials(s)) {
+				return "passed";
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return "failed";
 	}
 
 	// Getters and Setters 

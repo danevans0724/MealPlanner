@@ -10,6 +10,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
 		store.setDefault(PreferenceConstants.PRE_REPO_CONN_STR, "Repository JDBC connection string");
+		store.setDefault(PreferenceConstants.PRE_REPO_USER_ID, "User Id");
+		store.setDefault(PreferenceConstants.PRE_REPO_USER_PWD, "ingredient");
 	}
-
 }
