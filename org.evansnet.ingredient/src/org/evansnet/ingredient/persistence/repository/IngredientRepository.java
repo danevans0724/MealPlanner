@@ -1,10 +1,11 @@
 package org.evansnet.ingredient.persistence.repository;
 
-import java.util.AbstractMap;
 import java.util.HashMap;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.evansnet.dataconnector.internal.core.DBMS;
 import org.evansnet.dataconnector.internal.core.Host;
+import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.persistence.PersistenceProvider;
 
@@ -25,12 +26,24 @@ public class IngredientRepository {
 	boolean isDefault;
 	
 	public IngredientRepository() {
-		connStr = new String("");
+		connStr = fetchDefaultRepo();
 		repoName = new String("");
 		repoConnection = new DBMS(new Host());
 		isDefault = false;
 	}
 	
+	/**
+	 * Retrieves the default repository connection string from the default properties
+	 * storage.
+	 * @return	The connection string for the default ingredient repository.
+	 */
+	private String fetchDefaultRepo() {
+		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+		connStr = store.getDefaultString(getConnectStr());
+	
+		return null;
+	}
+
 	public HashMap<Integer, Ingredient> getTreeIngredients() {
 		//TODO: provide a list of ingredients from the repository table.
 		PersistenceProvider provider = new PersistenceProvider();

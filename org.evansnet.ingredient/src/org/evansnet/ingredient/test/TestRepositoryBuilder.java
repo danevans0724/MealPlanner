@@ -52,7 +52,7 @@ public class TestRepositoryBuilder {
 		try {
 			builder.createRepository(conn1);		//Test build SQL Server
 			type = builder.getDatabase().getDBMS();
-			assertTrue(type == DBType.MySQL);
+			assertTrue(type == DBType.MS_SQLSrv);
 		} catch (SQLException e) {
 			fail("Could not create Ingredient repository table!\n" );
 			e.printStackTrace();

@@ -3,15 +3,10 @@ package org.evansnet.ingredient.persistence.repository;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.evansnet.dataconnector.internal.dbms.MySQLConnection;
-import org.evansnet.dataconnector.internal.dbms.SQLSrvConnection;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
@@ -61,54 +56,6 @@ public class RepositoryBuilder {
 		connStr = strConn;
 	}
 	
-	/**
-	 * Used when the builder is supplied a connection string. After the string is parsed,
-	 * and the type of DBMS is determined, then the database is constructed based on the 
-	 * DBMS types supported by the org.evansnet.dataconnector plug-in.
-	 * 
-	 * @param dbType
-	 * @throws ClassNotFoundException
-	 * @throws SQLException
-	 */
-	private void declareDbType(DBType dbType) throws ClassNotFoundException, SQLException {
-		int h, endDB;
-		switch(dbType) {
-		case MS_SQLSrv :
-			database = new SQLSrvConnection();
-			
-			//We know the format of the connection string so set the host based on the connection string content
-			h = connStr.indexOf("://") + 3;
-			endDB = connStr.indexOf(":", h);
-			database.getHost().setHostName(connStr.substring(h, endDB));
-			h = connStr.indexOf("/", h) + 1;						// Find the database name.
-			endDB = connStr.indexOf(";", h); 
-			if (endDB < 0) {
-				database.setDatabaseName(connStr.substring(h));
-			} else {
-				database.setDatabaseName(connStr.substring(h, endDB));
-				extractCredentials(connStr.substring(h,endDB));
-			}
-			break;
-			
-		case MySQL :
-			database = new MySQLConnection();
-			//jdbc:mysql://<<Host>>:3306/<<database>>
-			h = connStr.indexOf("://") + 3;
-			database.getHost().setHostName(connStr.substring(h, connStr.indexOf(":", h)));
-			h = connStr.indexOf("/", h) + 1;						// Find the database name.
-			endDB = connStr.indexOf(";", h); 
-			if (endDB < 0) {
-				database.setDatabaseName(connStr.substring(h));
-			} else {
-				database.setDatabaseName(connStr.substring(h, endDB));
-			}
-			break;
-		default:
-			database = null;
-			break;
-		}
-	}
-
 
 	/**
 	 * Creates an ingredient repository for a supported DBMS system. If the 
@@ -120,14 +67,15 @@ public class RepositoryBuilder {
 	 * @return An Ingredient repository object
 	 */	
 	public IngredientRepository createRepository() throws SQLException {
+		RepositoryHelper rhlp = new RepositoryHelper(database);
 		if (connStr == null) {
 			conn = buildConnection();
 			} else {
-			DBType dbType = parseForDBMS(connStr);
+			DBType dbType = rhlp.parseForDBMS(connStr);
 			try {
-				declareDbType(dbType);
+				rhlp.declareDbType(dbType, database);
 			} catch (ClassNotFoundException | SQLException e) {
-				showErrMessageBox("Create Repository Error!", 
+				rhlp.showErrMessageBox("Create Repository Error!", 
 						"An error occurred while creating the repository table: " + e.getMessage() +
 						"\n See the log for more information.");
 				e.printStackTrace();
@@ -139,7 +87,7 @@ public class RepositoryBuilder {
 			conn.close();
 		} catch (SQLException e) {
 			javaLogger.log(Level.FINEST, "Failed to close the repository database!");
-			showErrMessageBox("Database Close Error!", 
+			rhlp.showErrMessageBox("Database Close Error!", 
 					"An error occurred while closing the repository database: " + e.getMessage() +
 					"\n See the log for more information.");
 			e.printStackTrace();
@@ -172,8 +120,8 @@ public class RepositoryBuilder {
 	}
 	
 	private void buildTable(Connection c) throws SQLException {
-		if (database.getSchema() == null) {
-			conn.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.
+		if (database.getSchema() == null || database.getSchema().isEmpty()) {
+			database.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.
 		}
 		
 		//First build the create table statement.
@@ -205,8 +153,9 @@ public class RepositoryBuilder {
 		try {
 			st.executeUpdate(sqlCreate);
 		} catch (SQLException e) {
+			RepositoryHelper helper = new RepositoryHelper(database);
 			javaLogger.log(Level.SEVERE, "An error occurred while creating the repository table. ");
-			showErrMessageBox("Create Repository Table Error",
+			helper.showErrMessageBox("Create Repository Table Error",
 					"The create table statement failed to create the ingredient repository table!");
 		}
 	}
@@ -219,99 +168,6 @@ public class RepositoryBuilder {
 		store.setValue(PreferenceConstants.PRE_REPO_CONN_STR, connStr);
 	}
 	
-	/**
-	 * Parses the JDBC connection string in order to get the DBMS type. The 
-	 * method assumes a JDBC string format of:
-	 * jdbc:<DBMS type>:/host:port or a variant consistent with the DBMS systems 
-	 * that are supported.
-	 * 
-	 * @param c  A valid JDBC connection string for a supported DBMS.
-	 * @return A DBMS manufacturer/type like DB2, MS SQL Server etc. 
-	 */
-	private DBType parseForDBMS(String c) {
-		DBType type = null; 
-		if (c.contains("jdbc:mysql")) {					//Based on MySQL connector driver.
-			type = DBType.MySQL;
-		} else if (c.contains("jdbc:sqlserver")) {		//Based on Microsoft driver.
-			type = DBType.MS_SQLSrv;
-		}
-		return type;
-	}
-	
-	/**
-	 * Shows an error message box given the message provided.
-	 * @return
-	 */
-	private void showErrMessageBox(String t, String msg) {
-		try {
-			MessageBox theMsg = new MessageBox(
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
-			theMsg.setText(t);
-			theMsg.setMessage(msg);
-			theMsg.open();
-		} catch (Exception e) {
-			javaLogger.log(Level.SEVERE, "Unable to get workbench: ", class_name);
-			e.printStackTrace();
-		}		
-	}
-	
-	/**
-	 * Called by declareDbType which passes a string that may consist of
-	 * a user id and a password. Extract the user id and password and set them
-	 * into this object's credential object and then into the database object's
-	 * credentials object.
-	 * @param s
-	 */
-	private boolean extractCredentials(String s) throws SQLException {
-//		if (database == null) {
-//			return false;
-//		}
-		ArrayList<String> cStr = new ArrayList<String>();
-		cStr.add("user");
-		cStr.add("password");
-		try {
-			for (String c : cStr) {
-				if (s.contains(c)) {
-					int start = s.indexOf(c);
-					int end = s.indexOf(";", start) > 0 ? s.indexOf(";", start) : s.length();
-					if (c.equals("user")) {
-						start = start + 5;
-						database.getCredentials().setUserID(s.substring(start, end));
-						javaLogger.log(Level.INFO, "Setting user ID " + s.substring(start, end));
-						continue;
-					} else {
-						start = start + 9;
-						database.getCredentials().setPassword(s.substring(start, end));
-//						javaLogger.log(Level.INFO, "Setting password " + s.substring(start, end));
-						continue;
-					}
-				} else {
-					return false;
-				}
-			}		
-		} catch (StringIndexOutOfBoundsException ob) {
-			return false;
-		} catch(Exception e) {
-			javaLogger.log(Level.WARNING, "An exception occurred when trying to get credentials" 
-					+ " from the string provided. \n");
-			e.printStackTrace(); 
-			throw new SQLException(e);
-		}
-		return true;
-	}
-	
-	// public method to facilitate JUnit test.
-	public String credentialExtractTest(String s) throws ClassNotFoundException, SQLException {
-		try {
-			if (extractCredentials(s)) {
-				return "passed";
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return "failed";
-	}
-
 	// Getters and Setters 
 	
 	public String getConnStr() {
