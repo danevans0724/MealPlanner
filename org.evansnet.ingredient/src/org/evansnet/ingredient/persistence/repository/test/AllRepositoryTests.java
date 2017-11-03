@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ TestExtractCredentialsFromString.class })
+@SuiteClasses({ TestRepositoryHelper.class })
 public class AllRepositoryTests {
 
 }

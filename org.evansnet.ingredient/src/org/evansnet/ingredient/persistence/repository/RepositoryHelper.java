@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.PlatformUI;
@@ -13,6 +14,8 @@ import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.dataconnector.internal.dbms.MySQLConnection;
 import org.evansnet.dataconnector.internal.dbms.SQLSrvConnection;
+import org.evansnet.ingredient.app.Activator;
+import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
 
 /**
  * Provides methods for working with ingredient repository objects.
@@ -26,10 +29,42 @@ public class RepositoryHelper {
 	
 	private IDatabase database;
 	String connStr;
+	
+	public RepositoryHelper() {
+		connStr = new String();		
+	}
 
 	public RepositoryHelper(IDatabase db) {
-		connStr = new String();
+		this();
 		database = db;
+	}
+	
+	/**
+	 * Retrieves the connection string of the default repository from the system and 
+	 * updates the provided database with the connection details. 
+	 * 
+	 * @param db An IDatabase object to update with the default repository's info
+	 * @return An IDatabase object that contains the information needed to operate the repository.
+	 */
+	public IDatabase getDefaultRepository() {	
+		IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
+		connStr = prefStore.getDefaultString(PreferenceConstants.PRE_REPO_CONN_STR);
+		try {
+			declareDbType(parseForDBMS(connStr), database);
+		} catch (ClassNotFoundException | SQLException e) {
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()",
+					"An exception occurred while attempting to get the default repository info from the preference store " + 
+			         e.getMessage());
+			e.printStackTrace();
+		}
+		database.getCredentials().setUserID(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_USER_ID));
+		database.getCredentials().setPassword(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_USER_PWD));
+		IngredientRepository repo = new IngredientRepository();
+		repo.setConnectStr(connStr);
+		repo.setDefault();
+		repo.setRepoName("Default Ingredient Repository");
+		repo.setRepoConnection(database);
+		return null;
 	}
 	
 	/**
@@ -41,13 +76,12 @@ public class RepositoryHelper {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public void declareDbType(DBType dbType, IDatabase database) throws ClassNotFoundException, SQLException {
+	public IDatabase declareDbType(DBType dbType, IDatabase database) throws ClassNotFoundException, SQLException {
 		int h, endDB;
 		String connStr = new String(database.getConnectionString());
 		switch(dbType) {
 		case MS_SQLSrv :
-			database = new SQLSrvConnection();
-			
+			//TODO: Update parser to handle inclusion of an instance name.
 			//We know the format of the connection string so set the host based on the connection string content
 			h = connStr.indexOf("://") + 3;
 			endDB = connStr.indexOf(":", h);
@@ -59,24 +93,23 @@ public class RepositoryHelper {
 			} else {
 				database.setDatabaseName(connStr.substring(h, endDB));
 			}
-			break;
+			return database;
 			
 		case MySQL :
-			database = new MySQLConnection();
 			//jdbc:mysql://<<Host>>:3306/<<database>>
 			h = connStr.indexOf("://") + 3;
 			database.getHost().setHostName(connStr.substring(h, connStr.indexOf(":", h)));
 			h = connStr.indexOf("/", h) + 1;						// Find the database name.
-			endDB = connStr.indexOf(";", h); 
+			endDB = connStr.indexOf("?", h); 
 			if (endDB < 0) {
 				database.setDatabaseName(connStr.substring(h));
 			} else {
 				database.setDatabaseName(connStr.substring(h, endDB));
 			}
-			break;
+			return database;
 		default:
 			database = null;
-			break;
+			return database;
 		}
 	}
 
@@ -89,13 +122,17 @@ public class RepositoryHelper {
 	 * 
 	 * @param c  A valid JDBC connection string for a supported DBMS.
 	 * @return A DBMS manufacturer/type like DB2, MS SQL Server etc. 
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
 	 */
-	public DBType parseForDBMS(String c) {
+	public DBType parseForDBMS(String c) throws ClassNotFoundException, SQLException {
 		DBType type = null; 
 		if (c.contains("jdbc:mysql")) {					//Based on MySQL connector driver.
 			type = DBType.MySQL;
+			database = new SQLSrvConnection();
 		} else if (c.contains("jdbc:sqlserver")) {		//Based on Microsoft driver.
 			type = DBType.MS_SQLSrv;
+			database = new MySQLConnection();
 		}
 		return type;
 	}
@@ -104,11 +141,11 @@ public class RepositoryHelper {
 	 * Shows an error message box given the message provided.
 	 * @return
 	 */
-	public void showErrMessageBox(String t, String msg) {
+	public void showErrMessageBox(String title, String msg) {
 		try {
 			MessageBox theMsg = new MessageBox(
 						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
-			theMsg.setText(t);
+			theMsg.setText(title);
 			theMsg.setMessage(msg);
 			theMsg.open();
 		} catch (Exception e) {

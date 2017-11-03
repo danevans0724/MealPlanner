@@ -17,7 +17,7 @@ import org.evansnet.dataconnector.internal.dbms.SQLSrvConnection;
 import org.evansnet.ingredient.persistence.repository.RepositoryHelper;
 
 
-public class TestExtractCredentialsFromString {
+public class TestRepositoryHelper {
 
 	Mockery mockery = new Mockery();
 	HashMap<DBType, String> connStrings;
@@ -77,18 +77,22 @@ public class TestExtractCredentialsFromString {
 	public void testParseForDBMS() {
 		RepositoryHelper rh = new RepositoryHelper(database);
 		DBType theType;
-		for (DBType t : connStrings.keySet()) {
-			theType = rh.parseForDBMS(connStrings.get(t));
-			switch(t) {
-			case MS_SQLSrv :
-				assertTrue(theType.equals(DBType.MS_SQLSrv));
-				break;
-			case MySQL :
-				assertTrue(theType.equals(DBType.MySQL));
-				break;
-				default :
-					fail("Incorrect DBMS chosen!");
+		try {
+			for (DBType t : connStrings.keySet()) {
+				theType = rh.parseForDBMS(connStrings.get(t));
+				switch(t) {
+				case MS_SQLSrv :
+					assertTrue(theType.equals(DBType.MS_SQLSrv));
+					break;
+				case MySQL :
+					assertTrue(theType.equals(DBType.MySQL));
+					break;
+					default :
+						fail("Incorrect DBMS chosen!");
+				}
 			}
+		} catch (Exception e) {
+			fail("An exception was thrown.");
 		}
 	}
 	
@@ -98,17 +102,19 @@ public class TestExtractCredentialsFromString {
 		for (DBType t : connStrings.keySet()) {
 			database.setConnectionString(connStrings.get(t));
 			try {
-				helper.declareDbType(t, database);
+				database = helper.declareDbType(t, database);
 			} catch (ClassNotFoundException | SQLException e) {
 				fail("Exception thrown: " + e.toString());
 				e.printStackTrace();
 			}
 			switch (t) {
 			case MS_SQLSrv :
-				assertTrue(database.getDatabaseName()== "theDatabase" );
+				assertTrue(database.getHost().getHostName().equals("host"));
+				assertTrue(database.getDatabaseName().equals("theDatabase"));
 				break;
 			case MySQL :
-				assertTrue(database.getDatabaseName()== "Host");
+				assertTrue(database.getHost().getHostName().equals("Host"));
+				assertTrue(database.getDatabaseName().equals("database"));
 				break;
 				default :
 					fail("Did not get correct database name!");

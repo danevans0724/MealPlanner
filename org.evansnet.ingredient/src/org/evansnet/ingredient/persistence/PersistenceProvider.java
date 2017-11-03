@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,6 +18,8 @@ import org.evansnet.dataconnector.internal.core.IHost;
 import org.evansnet.dataconnector.ui.ConnectionDialog;
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.persistence.IngredientPersistenceAction;
+import org.evansnet.ingredient.persistence.repository.IngredientRepository;
+import org.evansnet.ingredient.persistence.repository.RepositoryHelper;
 
 /**
  * Base class for the ingredient persistence mechanism.
@@ -29,13 +32,16 @@ public class PersistenceProvider {
 	
 	/* Algorithm
 	 * ------------------
-	 * 1. get a connection to the database
+	 * 1. get a connection to the repository database
 	 * 2. Set the persistence type: Fetch, save, update, delete.
 	 * 3. Set up a basic query for the type.
 	 * 4. Allow the sub-class of the persistence type to execute the query.
 	 * 
-	 */		
-	private static Logger javaLogger = Logger.getLogger("IngredientPersistanceProvider");
+	 */
+	public static final String THIS_CLASS_NAME = PersistenceProvider.class.getName();
+	private static Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
+	
+	public static IngredientRepository repository;
 	IHost host;
 	IDatabase  db;
 	ConnectionDialog connectDialog;
@@ -44,8 +50,10 @@ public class PersistenceProvider {
 	ProgressBar progress;		//TODO: implement the progress bar for connection operation.
 	
 	public PersistenceProvider() {
+		repository = getRepository(); //Set the repository to the default 
 		host = new Host();
-		db = new DBMS();			
+		db = new DBMS();
+		ingredient = new Ingredient();
 	}
 	
 	public PersistenceProvider(Shell s) {
@@ -71,12 +79,11 @@ public class PersistenceProvider {
 	}
 
 	/**
-	 * Provides a way to get the connection to the database. Shows the 
+	 * Provides a way to get the connection to a database. Shows the 
 	 * connector dialog and persists the connection info to the repository.
 	 */
 	public void showConnDialog() {
 		db = (IDatabase)connectDialog.open();
-//		conn = db.getConnection();	
 	}
 	
 	public void doSave() throws SQLException {
@@ -93,8 +100,9 @@ public class PersistenceProvider {
 	 * @return A list of ingredients with the name provided.
 	 */
 	public Map<Integer, Ingredient> doFetch(String name) {
-		//TODO: Ingredient persistence: Fetch the ingredient(s) with the name provided 
-		return null;
+		Map<Integer, Ingredient> ingredientList = new HashMap<Integer, Ingredient>();
+		ingredientList = repository.fetch(name);
+		return ingredientList;
 	}
 	
 	/**
@@ -103,7 +111,9 @@ public class PersistenceProvider {
 	 * @return The ingredient with that ID, or null if it doesn't exist.
 	 */
 	public Ingredient doFetch(int id) throws SQLException {
-		return null;
+		Ingredient ing = new Ingredient();
+		ing = repository.fetch(id);
+		return ing;
 	}
 	
 	public void doUpdate(int id) throws SQLException {
@@ -117,6 +127,20 @@ public class PersistenceProvider {
 	public void closeConnection() throws SQLException {
 		this.closeConnection(conn);
 		javaLogger.log(Level.INFO, "Database connection closed.");
+	}
+	
+	public void setRepsitory(IngredientRepository ing) {
+		repository = ing;
+	}
+	
+	private IngredientRepository getRepository() {
+		// If repository hasn't been set yet, get the default.
+		if (repository == null) {
+			repository = new IngredientRepository();
+			RepositoryHelper helper = new RepositoryHelper();
+			repository.setRepoConnection(helper.getDefaultRepository());
+		} 
+		return repository;
 	}
 	
 	private void closeConnection(Connection c) throws SQLException {

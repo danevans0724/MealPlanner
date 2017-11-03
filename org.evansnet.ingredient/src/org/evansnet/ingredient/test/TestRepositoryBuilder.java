@@ -2,8 +2,6 @@ package org.evansnet.ingredient.test;
 
 import static org.junit.Assert.*;
 
-import java.sql.SQLException;
-
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.ingredient.persistence.repository.IngredientRepository;
 import org.evansnet.ingredient.persistence.repository.RepositoryBuilder;
@@ -39,7 +37,7 @@ public class TestRepositoryBuilder {
 			builder.createRepository(conn2);		//Test build SQL Server
 			type = builder.getDatabase().getDBMS();
 			assertTrue(type == DBType.MS_SQLSrv);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			fail("Could not create Ingredient repository table!\n" );
 			e.printStackTrace();
 		}
@@ -53,7 +51,7 @@ public class TestRepositoryBuilder {
 			builder.createRepository(conn1);		//Test build SQL Server
 			type = builder.getDatabase().getDBMS();
 			assertTrue(type == DBType.MS_SQLSrv);
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			fail("Could not create Ingredient repository table!\n" );
 			e.printStackTrace();
 		}
