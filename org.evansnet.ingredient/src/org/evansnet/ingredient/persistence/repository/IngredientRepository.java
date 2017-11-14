@@ -3,7 +3,9 @@ package org.evansnet.ingredient.persistence.repository;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.evansnet.dataconnector.internal.core.IDatabase;
@@ -23,11 +25,13 @@ public class IngredientRepository {
 	String 		repoName;
 	String 		repoVersion;
 	boolean 	isDefault;
+	Map<Integer, Ingredient> contents;
 	
 	public IngredientRepository() {
 		connStr = fetchDefaultRepo();
 		repoName = new String("");
 		isDefault = false;
+		contents = new HashMap<Integer, Ingredient>();
 	}
 	
 	/**
@@ -110,18 +114,7 @@ public class IngredientRepository {
 	 * @return A Map object containing the IDs and names of all of the ingredients in the repository.
 	 */
 	public Map<Integer, Ingredient> fetchAll() throws Exception {
-		/*
-		 * 1. Connect
-		 * 2. Select * query
-		 * 3. Populate map from the result set.
-		 * 4. Return.
-		 */
-		Map<Integer, Ingredient> theMap = new HashMap<Integer, Ingredient>();
-		Connection conn = repo.getConnection();
-		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT";
-		Statement stmt = null;
-		stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery(s);
+		ResultSet rs = doSelect();
 		
 		Ingredient i = new Ingredient();
 		while (rs.next()) {
@@ -133,18 +126,54 @@ public class IngredientRepository {
 			i.setUnitPrice(rs.getBigDecimal("UNIT_PRICE"));
 			i.setPkgPrice(rs.getBigDecimal("PKG_PRICE"));
 			i.setRecipe(rs.getBoolean("IS_RECIPE"));
-		theMap.put(i.getID(), i);
+		contents.put(i.getID(), i);
 		}
-		return theMap;
+		return contents;
 	}
 
-	public Map<Integer, Ingredient> fetch(String name) {
-		// TODO Fetch ingredients from the repository that have the name provided.
+	/**
+	 * Get an ingredient from the repository that has the ingredient id provided. Since 
+	 * the ingredient ID is the primary key of the ingredient repository table, there is 
+	 * guaranteed to be only one record with that ID. 
+	 * @param id The integer identifier of the ingredient.
+	 * @return The ingredient with the matching ID or null if the id is not found.
+	 * @throws Exception
+	 */
+	public Ingredient fetch(int id) throws Exception {
+		if (contents.isEmpty()) {
+			fetchAll();
+		}
+		if (contents.containsKey(id)) {
+			return contents.get(id);
+		} 
 		return null;
 	}
-
-	public Ingredient fetch(int id) {
-		// TODO Fetch the ingredient with the ID given, from the repository.
-		return null;
+	
+	/**
+	 * Gets the ingredients from the repository that have the name provided. Since the name 
+	 * field does not have a unique constraint, it is possible to get more than one ingredient. 
+	 * Therefore, the method returns a HashMap object that contains all the ingredients in the 
+	 * repository table that have the name requested. 
+	 * 
+	 * @param n A string value representing the ingredient name to search for.
+	 * @return A HashMap that contains the ingredients that have the name provided.
+	 */
+	public List<Ingredient> fetchName(String n) {
+		List<Ingredient> result = new ArrayList<Ingredient>();
+		for (Ingredient i : contents.values()) {
+			if (i.getIngredientName().equals(n)) {
+				result.add(i);
+			}
+		}
+		return result;
+	}
+	
+	private ResultSet doSelect() throws Exception {
+		Connection conn = repo.getConnection();
+		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT";
+		Statement stmt = null;
+		stmt = conn.createStatement();
+		ResultSet rs = stmt.executeQuery(s);
+		return rs;
 	}
 }

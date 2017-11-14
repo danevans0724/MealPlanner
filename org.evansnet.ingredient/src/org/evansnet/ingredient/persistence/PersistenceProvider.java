@@ -94,28 +94,6 @@ public class PersistenceProvider {
 				rows + " Rows affected.");
 	}
 	
-	/**
-	 * Fetch the ingredient(s) with the name provided
-	 * @param name The name of the ingredient
-	 * @return A list of ingredients with the name provided.
-	 */
-	public Map<Integer, Ingredient> doFetch(String name) {
-		Map<Integer, Ingredient> ingredientList = new HashMap<Integer, Ingredient>();
-		ingredientList = repository.fetch(name);
-		return ingredientList;
-	}
-	
-	/**
-	 * Return the ingredient with the ID = int
-	 * @param id An integer value representing the ingredient ID.
-	 * @return The ingredient with that ID, or null if it doesn't exist.
-	 */
-	public Ingredient doFetch(int id) throws SQLException {
-		Ingredient ing = new Ingredient();
-		ing = repository.fetch(id);
-		return ing;
-	}
-	
 	public void doUpdate(int id) throws SQLException {
 		//TODO: Update the ingredient (update query).
 	}
