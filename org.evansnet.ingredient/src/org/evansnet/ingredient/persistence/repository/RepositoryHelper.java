@@ -12,7 +12,6 @@ import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.Credentials;
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
-import org.evansnet.dataconnector.internal.dbms.MySQLConnection;
 import org.evansnet.dataconnector.internal.dbms.SQLSrvConnection;
 import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
@@ -50,7 +49,7 @@ public class RepositoryHelper {
 		IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
 		connStr = prefStore.getDefaultString(PreferenceConstants.PRE_REPO_CONN_STR);
 		try {
-			declareDbType(parseForDBMS(connStr), database);
+			declareDbType(parseForDBMS(connStr), connStr);
 		} catch (ClassNotFoundException | SQLException e) {
 			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()",
 					"An exception occurred while attempting to get the default repository info from the preference store " + 
@@ -76,11 +75,12 @@ public class RepositoryHelper {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public IDatabase declareDbType(DBType dbType, IDatabase database) throws ClassNotFoundException, SQLException {
+	public IDatabase declareDbType(DBType dbType, String c) throws ClassNotFoundException, SQLException {
 		int h, endDB;
-		String connStr = new String(database.getConnectionString());
+		String connStr = c;
 		switch(dbType) {
 		case MS_SQLSrv :
+			database = new SQLSrvConnection();
 			//TODO: Update parser to handle inclusion of an instance name.
 			//We know the format of the connection string so set the host based on the connection string content
 			h = connStr.indexOf("://") + 3;
@@ -93,6 +93,9 @@ public class RepositoryHelper {
 			} else {
 				database.setDatabaseName(connStr.substring(h, endDB));
 			}
+			database.setConnectionString(connStr);
+			if (extractCredentials(connStr));
+			database.setSchema("dbo");     // Set default to dbo.
 			return database;
 			
 		case MySQL :
@@ -106,6 +109,7 @@ public class RepositoryHelper {
 			} else {
 				database.setDatabaseName(connStr.substring(h, endDB));
 			}
+			database.setConnectionString(connStr);
 			return database;
 		default:
 			database = null;
@@ -129,10 +133,10 @@ public class RepositoryHelper {
 		DBType type = null; 
 		if (c.contains("jdbc:mysql")) {					//Based on MySQL connector driver.
 			type = DBType.MySQL;
-			database = new SQLSrvConnection();
+//			database = new SQLSrvConnection();
 		} else if (c.contains("jdbc:sqlserver")) {		//Based on Microsoft driver.
 			type = DBType.MS_SQLSrv;
-			database = new MySQLConnection();
+//			database = new MySQLConnection();
 		}
 		return type;
 	}

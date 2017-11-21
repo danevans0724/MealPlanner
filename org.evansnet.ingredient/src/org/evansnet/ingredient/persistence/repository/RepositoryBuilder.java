@@ -6,13 +6,10 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
-import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.persistence.PersistenceProvider;
-import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
 
 /**
  * A class that allows for the creation of a repository in a database and 
@@ -47,7 +44,7 @@ public class RepositoryBuilder {
 		sqlCreate = null;
 		connStr = null;
 		conn = null;
-		repo = new IngredientRepository();
+//		repo = new IngredientRepository();
 	}
 	
 	public RepositoryBuilder(String strConn) {
@@ -74,7 +71,7 @@ public class RepositoryBuilder {
 			} else {
 			DBType dbType = rhlp.parseForDBMS(connStr);
 			try {
-				rhlp.declareDbType(dbType, database);
+				database = rhlp.declareDbType(dbType, connStr);
 			} catch (ClassNotFoundException | SQLException e) {
 				rhlp.showErrMessageBox("Create Repository Error!", 
 						"An error occurred while creating the repository table: " + e.getMessage() +
@@ -82,8 +79,10 @@ public class RepositoryBuilder {
 				e.printStackTrace();
 			}			
 		}
+		repo = new IngredientRepository();
 		repo.setConnectStr(database.getConnectionString()); 	
-		buildTable(conn);
+		repo.setRepoConnection(database);
+		buildTable(database.getConnection());
 		try {
 			conn.close();
 		} catch (SQLException e) {
@@ -93,7 +92,7 @@ public class RepositoryBuilder {
 					"\n See the log for more information.");
 			e.printStackTrace();
 		}
-		persistConn();		// Store the connection string in the plug-in preferences.
+//		persistConn();		// Store the connection string in the plug-in preferences.
 		return repo;
 	}
 	
@@ -163,14 +162,6 @@ public class RepositoryBuilder {
 			helper.showErrMessageBox("Create Repository Table Error",
 					"The create table statement failed to create the ingredient repository table!");
 		}
-	}
-	
-	/**
-	 * Persists the connection string to the plug-in preference store.
-	 */
-	private void persistConn() {
-		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		store.setValue(PreferenceConstants.PRE_REPO_CONN_STR, connStr);
 	}
 	
 	// Getters and Setters 

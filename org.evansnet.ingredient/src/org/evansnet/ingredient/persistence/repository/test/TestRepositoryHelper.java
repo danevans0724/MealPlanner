@@ -102,7 +102,7 @@ public class TestRepositoryHelper {
 		for (DBType t : connStrings.keySet()) {
 			database.setConnectionString(connStrings.get(t));
 			try {
-				database = helper.declareDbType(t, database);
+				database = helper.declareDbType(t, database.getConnectionString());
 			} catch (ClassNotFoundException | SQLException e) {
 				fail("Exception thrown: " + e.toString());
 				e.printStackTrace();
