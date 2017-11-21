@@ -234,19 +234,47 @@ public class IngredientRepository {
 	 * Updates the repository object with the contents of the ingredient object provide.
 	 * @param i The ingredient object that contains the updated data.
 	 */
-	public void doUpdate(Ingredient i) {
+	public void doUpdate(Ingredient i) throws SQLException, Exception {
 		StringBuilder update = new StringBuilder();
 		// Update dbo.ingredient set (id = ingredient.getID())... where ID = i.getID()...
+		update.append("UPDATE " + repo.getSchema() + ".INGREDIENT SET(");
+		update.append("ID=" + i.getID() + ", ");
+		update.append("ING_NAME=" + i.getIngredientName() + ", ");
+		update.append("ING_DESC=" + i.getIngredientDescription() + ", ");
+		update.append("UNIT_OF_MEASURE=" + i.getStrUom() + ", ");
+		update.append("PKG_UOM=" + i.getPkgUom() + ", ");
+		update.append("UNIT_PRICE=" + i.getUnitPrice() + ", ");
+		update.append("PKG_PRICE=" + i.getPkgPrice());
+		if(i.isRecipe()) {
+			update.append("IS_RECIPE=1");	//TODO: Update code to handle values other than MSSql Server bit field.
+		} else {
+			update.append("IS_RECIPE=0");			
+		}
+		update.append(")");
 		
+		Connection conn = repo.getConnection();
+		Statement s = conn.createStatement();
+		int rowsUpd = s.executeUpdate(update.toString());
+		if(rowsUpd < 1) {
+			throw new SQLException("An error occurred while updating ingredient with ID " + i.getID());
+		}
+		conn.close();
 	}
 	
 	/**
 	 * Removes the ingredient with the ID provided from the repository
 	 * @param i The integer ID value of the ingredient
 	 */
-	public void doDelete(int i) {
-		StringBuilder delete = new StringBuilder("DELETE FROM ");
-		// Delete from dbo.ingredient where ID = i
+	public void doDelete(int i) throws SQLException, Exception {
+		StringBuilder delete = new StringBuilder("DELETE FROM " + repo.getSchema() + "." +
+				"INGREDIENT WHERE ID = " + i);
+		Connection conn = repo.getConnection();
+		Statement s = conn.createStatement();
+		int rowsDel = s.executeUpdate(delete.toString());
+		if (rowsDel < 1) {
+			throw new SQLException("An error occurred while deleting ingredient with ID " + i);
+		}
+		conn.close();
 	}
 	
 	/**
@@ -254,7 +282,17 @@ public class IngredientRepository {
 	 * integer ID number.
 	 * @paream i The ID number of the ingredient to check for
 	 */
-	public boolean checkExists(int i) {
+	public boolean checkExists(int i) throws SQLException, Exception {
+		String query = new String("SELECT * FROM " + repo.getSchema() + "." + 
+				"INGREDIENT WHERE ID = " + i);
+		Connection conn;
+			 conn = repo.connect(repo.getConnectionString());
+			Statement s = conn.createStatement(); 
+			ResultSet result = s.executeQuery(query);
+			if (result.next()) {
+				return true;
+			}		
+			conn.close();
 		return false;
 	}
 
