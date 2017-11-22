@@ -2,7 +2,6 @@ package org.evansnet.ingredient.persistence.repository.test;
 
 import static org.junit.Assert.*;
 
-import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,10 +52,10 @@ public class TestRepository {
 	}
 	
 	@Test
-	public void testDoSelectAll() {
+	public void testDoFetchAll() {
 		//Test executing a select statement from the IngredientRepository class.
 		try {
-			ResultSet ingredients = repo.doSelectAll();
+			Map<Integer, Ingredient> ingredients = repo.fetchAll();
 			assertNotNull(ingredients);
 		} catch (Exception e) {
 			fail("Exception thrown! " + e.getMessage());
@@ -64,11 +63,6 @@ public class TestRepository {
 		}
 	}
 	
-	@Test
-	public void testFetchAll() {
-		fail("Not yet implemented");	//TODO: Set up to mock a repository connection and query.
-	}
-
 	@Test
 	public void testFetchID() {
 		fail("Not yet implemented");

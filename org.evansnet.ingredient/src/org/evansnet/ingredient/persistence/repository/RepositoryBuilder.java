@@ -81,7 +81,7 @@ public class RepositoryBuilder {
 		}
 		repo = new IngredientRepository();
 		repo.setConnectStr(database.getConnectionString()); 	
-		repo.setRepoConnection(database);
+		repo.setRepo(database);
 		buildTable(database.getConnection());
 		try {
 			conn.close();

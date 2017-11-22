@@ -4,8 +4,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.eclipse.swt.SWT;
@@ -94,12 +92,12 @@ public class PersistenceProvider {
 				rows + " Rows affected.");
 	}
 	
-	public void doUpdate(int id) throws SQLException {
-		//TODO: Update the ingredient (update query).
+	public void doUpdate(Ingredient i) throws SQLException, Exception {
+		repository.doUpdate(i);
 	}
 	
-	public void doDelete(int id) throws SQLException {
-		//TODO: Delete the ingredient (delete query).
+	public void doDelete(Ingredient i) throws SQLException, Exception {
+		repository.doDelete(i.getID());
 	}
 	
 	public void closeConnection() throws SQLException {
@@ -116,7 +114,7 @@ public class PersistenceProvider {
 		if (repository == null) {
 			repository = new IngredientRepository();
 			RepositoryHelper helper = new RepositoryHelper();
-			repository.setRepoConnection(helper.getDefaultRepository());
+			repository.setRepo(helper.getDefaultRepository());
 		} 
 		return repository;
 	}

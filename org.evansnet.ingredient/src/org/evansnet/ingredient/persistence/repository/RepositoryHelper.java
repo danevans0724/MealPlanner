@@ -58,12 +58,7 @@ public class RepositoryHelper {
 		}
 		database.getCredentials().setUserID(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_USER_ID));
 		database.getCredentials().setPassword(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_USER_PWD));
-		IngredientRepository repo = new IngredientRepository();
-		repo.setConnectStr(connStr);
-		repo.setDefault();
-		repo.setRepoName("Default Ingredient Repository");
-		repo.setRepoConnection(database);
-		return null;
+		return database;
 	}
 	
 	/**

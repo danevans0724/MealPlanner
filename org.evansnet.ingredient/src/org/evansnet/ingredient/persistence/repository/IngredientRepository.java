@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.model.Ingredient;
@@ -36,6 +38,8 @@ public class IngredientRepository {
 	String 		repoVersion;
 	boolean 	isDefault;
 	Map<Integer, Ingredient> contents;
+	ResultSet   resultSet;
+	Ingredient  ingredient;
 	
 	public IngredientRepository() {
 		connStr = new String();
@@ -49,11 +53,13 @@ public class IngredientRepository {
 	 * storage.
 	 * @return	The connection string for the default ingredient repository.
 	 */
-	private String fetchDefaultRepo() {
+	public String fetchDefaultRepo() {
 		RepositoryHelper helper = new RepositoryHelper();
 		repo = helper.getDefaultRepository();
+		isDefault = true;
+		setRepoName("Default Ingredient Repository");
+		repoVersion = "1.0";
 		connStr = repo.getConnectionString();
-		//TODO: If we retrieve the connection string from storage we need to construct the db object.
 		return connStr;
 	}
 	
@@ -65,27 +71,33 @@ public class IngredientRepository {
 	 * @return A list of the ingredients contained in the repository tree.
 	 */
 	public HashMap<Integer, Ingredient> getTreeIngredients() {
-		//TODO: provide a list of ingredients from the repository table.
-		return null;
+		return (HashMap<Integer, Ingredient>) contents;
 	}
 	
+	/**
+	 * Returns the first ingredient in the repository that has the given name. 
+	 * @param name 
+	 * @return The ingredient object that has the name, or null if it is not found.
+	 */
 	public Ingredient getIngredient(String name) {
-		//TODO: Implement the Get an ingredient by name method
+		// Check the map for the ingredient name.
+		for (Entry<Integer, Ingredient> ing : contents.entrySet())
+			if (ing.getValue().getIngredientName().equals(name)) {
+				return ing.getValue();
+			}
 		return null;
 	}
 	
-	public Ingredient getIngredient(int id) {
-		//TODO: Implement the get ingredient by ID method
+	public Ingredient getIngredient(int id) throws SQLException, Exception {
+		if (checkExists(id)) {
+			
+		}
 		return null;
-	}
-	
-	public void store(Ingredient i) {
-		//TODO: Implement the store ingredient method
 	}
 	
 	protected String fetchVersion() {
 		//Get the repository version from the database
-		return null;
+		return "1.0";
 	}
 	
 	public String getRepoVersion() {
@@ -117,8 +129,8 @@ public class IngredientRepository {
 		return isDefault;
 	}
 
-	public void setRepoConnection(IDatabase database) {
-		// TODO Auto-generated method stub
+	public void setRepo(IDatabase database) {
+		repo = database;
 	}
 	
 	/** 
@@ -144,7 +156,7 @@ public class IngredientRepository {
 	}
 
 	/**
-	 * Get an ingredient from the repository that has the ingredient id provided. Since 
+	 * Get an ingredient from the ingredient map that has the ingredient id provided. Since 
 	 * the ingredient ID is the primary key of the ingredient repository table, there is 
 	 * guaranteed to be only one record with that ID. 
 	 * @param id The integer identifier of the ingredient.
@@ -162,7 +174,7 @@ public class IngredientRepository {
 	}
 	
 	/**
-	 * Gets the ingredients from the repository that have the name provided. Since the name 
+	 * Gets the ingredients from the ingredient map that have the name provided. Since the name 
 	 * field does not have a unique constraint, it is possible to get more than one ingredient. 
 	 * Therefore, the method returns a HashMap object that contains all the ingredients in the 
 	 * repository table that have the name requested. 
@@ -180,7 +192,7 @@ public class IngredientRepository {
 		return result;
 	}
 	
-	public ResultSet doSelectAll() throws Exception {
+	private ResultSet doSelectAll() throws Exception {
 		Connection conn = repo.getConnection();
 		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT";
 		Statement stmt = null;
@@ -189,12 +201,20 @@ public class IngredientRepository {
 		return rs;
 	}
 	
-	public ResultSet doSelect(int i) throws Exception {
+	/**
+	 * Performs a select statement on the ingredient repository to search for the ingredient
+	 * with the id equal to the integer value parameter.
+	 * @param i
+	 * @return A ResultSet object that contains the ingredient record or is empty if it doesn't exist.
+	 * @throws Exception
+	 */
+	private ResultSet doSelect(int i) throws Exception {
 		Connection conn = repo.getConnection();
 		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT WHERE ID=" + i;
 		Statement stmt = null;
 		stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery(s);
+		conn.close(); //TODO: Check to see if this makes the result set unavailable.
 		return rs;		
 	}
 
@@ -215,18 +235,34 @@ public class IngredientRepository {
 		insert.append("'" + i.getPkgUom() + "', ");
 		insert.append("'" + i.getUnitPrice() + "', ");
 		insert.append("'" + i.getPkgPrice() + "', ");
-		insert.append("0)"); 	//TODO: Add code to check for DBMS type and boolean value.
-		
+		if (i.isRecipe()) {
+			if (repo.getDBMS().equals(DBType.MS_SQLSrv)) {
+				insert.append("1)"); 
+			} else if (repo.getDBMS().equals(DBType.MySQL)) {
+				insert.append("true");
+			}
+		} else {
+			if (repo.getDBMS().equals(DBType.MS_SQLSrv)) {
+				insert.append("0)"); 
+			} else if (repo.getDBMS().equals(DBType.MySQL)) {
+				insert.append("false");
+			}			
+		}
 		Connection con = repo.getConnection();
 		Statement stmt = con.createStatement();
 		try {
 			rowsInserted = stmt.executeUpdate(insert.toString());
+			if (rowsInserted > 0) {
+				//The insert was successful so add the ingredient to the map.
+				contents.put(i.getID(), i);
+			}
 		} catch (Exception e) {
 			javaLogger.log(Level.SEVERE, THIS_CLASS_NAME, 
 					"Faiied to insert ingredient record. Rows inserted: : " + rowsInserted );
 			e.printStackTrace();
+		} finally {
+			con.close();
 		}
-		//TODO: Complete the query statement and process.
 	}
 	
 	
@@ -246,9 +282,17 @@ public class IngredientRepository {
 		update.append("UNIT_PRICE=" + i.getUnitPrice() + ", ");
 		update.append("PKG_PRICE=" + i.getPkgPrice());
 		if(i.isRecipe()) {
-			update.append("IS_RECIPE=1");	//TODO: Update code to handle values other than MSSql Server bit field.
+			if (repo.getDBMS().equals(DBType.MS_SQLSrv)) {
+				update.append("IS_RECIPE=1");				
+			} else if (repo.getDBMS().equals(DBType.MySQL)) {
+				update.append("IS_RECIPE=true");
+			}
 		} else {
-			update.append("IS_RECIPE=0");			
+			if (repo.getDBMS().equals(DBType.MS_SQLSrv)) {
+				update.append("IS_RECIPE=0");				
+			} else if (repo.getDBMS().equals(DBType.MySQL)) {
+				update.append("IS_RECIPE=false");
+			}
 		}
 		update.append(")");
 		
@@ -280,19 +324,13 @@ public class IngredientRepository {
 	/**
 	 * Checks the repository for the existence of an ingredient given that ingredients
 	 * integer ID number.
-	 * @paream i The ID number of the ingredient to check for
+	 * @param i The ID number of the ingredient to check for
 	 */
 	public boolean checkExists(int i) throws SQLException, Exception {
-		String query = new String("SELECT * FROM " + repo.getSchema() + "." + 
-				"INGREDIENT WHERE ID = " + i);
-		Connection conn;
-			 conn = repo.connect(repo.getConnectionString());
-			Statement s = conn.createStatement(); 
-			ResultSet result = s.executeQuery(query);
-			if (result.next()) {
+			 resultSet = doSelect(i);
+			if (resultSet.next()) {
 				return true;
 			}		
-			conn.close();
 		return false;
 	}
 
@@ -314,8 +352,14 @@ public class IngredientRepository {
 	/**
 	 * Checks the repository for records.
 	 * @return Returns true if there are no ingredient records in the repository table. 
+	 * @throws Exception 
 	 */
-	public boolean isEmpty() {
-		return true;
+	public boolean isEmpty() throws Exception {
+		if (contents.isEmpty()) {			//Check the map first if empty than run the query.
+			if (fetchAll().isEmpty()) {
+				return true;
+			}
+		} 
+		return false;
 	}
 }
