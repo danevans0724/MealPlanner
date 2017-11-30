@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.evansnet.dataconnector.internal.core.Credentials;
 import org.evansnet.dataconnector.internal.core.DBType;
@@ -57,6 +58,10 @@ public class TestRepository {
 		try {
 			Map<Integer, Ingredient> ingredients = repo.fetchAll();
 			assertNotNull(ingredients);
+			for (Integer i : ingredients.keySet()) {
+				Ingredient theIng = ingredients.get(i);
+				System.out.println(theIng.getID() + theIng.getIngredientName());
+			}
 		} catch (Exception e) {
 			fail("Exception thrown! " + e.getMessage());
 			e.printStackTrace();
@@ -65,7 +70,14 @@ public class TestRepository {
 	
 	@Test
 	public void testFetchID() {
-		fail("Not yet implemented");
+		Ingredient i = new Ingredient();
+		try {
+			i = repo.fetch(1);
+			assertNotNull(i);
+		} catch (Exception e) {
+			fail("Exception thrown from testFetchID() " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 	@Test

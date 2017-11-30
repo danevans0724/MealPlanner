@@ -44,6 +44,7 @@ public class IngredientRepository {
 	public IngredientRepository() {
 		connStr = new String();
 		repoName = new String("");
+		repoVersion = new String("1.0");
 		isDefault = false;
 		contents = new HashMap<Integer, Ingredient>();
 	}
@@ -71,7 +72,19 @@ public class IngredientRepository {
 	 * @return A list of the ingredients contained in the repository tree.
 	 */
 	public HashMap<Integer, Ingredient> getTreeIngredients() {
-		return (HashMap<Integer, Ingredient>) contents;
+		if (!contents.isEmpty()) {
+			return (HashMap<Integer, Ingredient>) contents;
+		} else {
+			try {
+				fetchAll();
+			} catch (Exception e) {
+				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getTreeIngredients()" ,
+						"An exception was thrown when retrieving ingredients from the repository " +
+						e.getMessage());
+				e.printStackTrace();
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -93,11 +106,6 @@ public class IngredientRepository {
 			
 		}
 		return null;
-	}
-	
-	protected String fetchVersion() {
-		//Get the repository version from the database
-		return "1.0";
 	}
 	
 	public String getRepoVersion() {
@@ -138,20 +146,26 @@ public class IngredientRepository {
 	 * @return A Map object containing the IDs and names of all of the ingredients in the repository.
 	 */
 	public Map<Integer, Ingredient> fetchAll() throws Exception {
-		ResultSet rs = doSelectAll();
+		Connection conn = repo.getConnection();
+		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT";
+		Statement stmt = null;
+		stmt = conn.createStatement();
+		resultSet = stmt.executeQuery(s);
+
 		
 		Ingredient i = new Ingredient();
-		while (rs.next()) {
-			i.setID(rs.getInt("ID"));
-			i.setIngredientName(rs.getString("ING_NAME"));
-			i.setIngredientDescription(rs.getString("ING_DESC"));
-			i.setStrUom(rs.getString("UNIT_OF_MEASURE"));
-			i.setPkgUom(rs.getString("PKG_UOM"));
-			i.setUnitPrice(rs.getBigDecimal("UNIT_PRICE"));
-			i.setPkgPrice(rs.getBigDecimal("PKG_PRICE"));
-			i.setRecipe(rs.getBoolean("IS_RECIPE"));
+		while (resultSet.next()) {
+			i.setID(resultSet.getInt("ID"));
+			i.setIngredientName(resultSet.getString("ING_NAME"));
+			i.setIngredientDescription(resultSet.getString("ING_DESC"));
+			i.setStrUom(resultSet.getString("UNIT_OF_MEASURE"));
+			i.setPkgUom(resultSet.getString("PKG_UOM"));
+			i.setUnitPrice(resultSet.getBigDecimal("UNIT_PRICE"));
+			i.setPkgPrice(resultSet.getBigDecimal("PKG_PRICE"));
+			i.setRecipe(resultSet.getBoolean("IS_RECIPE"));
 		contents.put(i.getID(), i);
 		}
+		conn.close();
 		return contents;
 	}
 
@@ -192,32 +206,6 @@ public class IngredientRepository {
 		return result;
 	}
 	
-	private ResultSet doSelectAll() throws Exception {
-		Connection conn = repo.getConnection();
-		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT";
-		Statement stmt = null;
-		stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery(s);
-		return rs;
-	}
-	
-	/**
-	 * Performs a select statement on the ingredient repository to search for the ingredient
-	 * with the id equal to the integer value parameter.
-	 * @param i
-	 * @return A ResultSet object that contains the ingredient record or is empty if it doesn't exist.
-	 * @throws Exception
-	 */
-	private ResultSet doSelect(int i) throws Exception {
-		Connection conn = repo.getConnection();
-		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT WHERE ID=" + i;
-		Statement stmt = null;
-		stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery(s);
-		conn.close(); //TODO: Check to see if this makes the result set unavailable.
-		return rs;		
-	}
-
 	/**
 	 * Inserts an ingredient object into the repository table. 
 	 * @param i The ingredient object that is to be added to the repository.
@@ -327,10 +315,15 @@ public class IngredientRepository {
 	 * @param i The ID number of the ingredient to check for
 	 */
 	public boolean checkExists(int i) throws SQLException, Exception {
-			 resultSet = doSelect(i);
-			if (resultSet.next()) {
+		Connection conn = repo.getConnection();
+		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT WHERE ID=" + i;
+		Statement stmt = conn.createStatement();
+		ResultSet rs = stmt.executeQuery(s);
+			if (rs.next()) {
+				conn.close();
 				return true;
 			}		
+		conn.close();
 		return false;
 	}
 
