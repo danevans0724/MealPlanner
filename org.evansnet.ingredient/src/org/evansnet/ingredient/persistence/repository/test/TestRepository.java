@@ -2,9 +2,11 @@ package org.evansnet.ingredient.persistence.repository.test;
 
 import static org.junit.Assert.*;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.evansnet.dataconnector.internal.core.Credentials;
 import org.evansnet.dataconnector.internal.core.DBType;
@@ -22,6 +24,7 @@ public class TestRepository {
 	private IDatabase db;
 	private Credentials credentials;
 	private IngredientRepository repo;
+	Ingredient i;
 	Map<Integer, Ingredient> map1 = new HashMap<Integer, Ingredient>();
 
 	@Before
@@ -42,6 +45,17 @@ public class TestRepository {
 		// Build the repository table.
 		RepositoryBuilder builder = new RepositoryBuilder(db.getConnectionString());
 		repo = builder.createRepository(db.getConnectionString());
+		
+		//Create an ingredient for insert.
+		i = new Ingredient();
+		i.setID(1);
+		i.setIngredientName("Flour");
+		i.setIngredientDescription("All purpose flour");
+		i.setPkgPrice(new BigDecimal("2.65"));
+		i.setUnitPrice(new BigDecimal("0.26"));
+		i.setPkgUom("1");
+		i.setStrUom("1");
+		i.setRecipe(false);
 	}
 
 	@After
@@ -53,6 +67,27 @@ public class TestRepository {
 	}
 	
 	@Test
+	public void testDoInsertNew() {
+		try {
+		 	int result = repo.doInsertNew(i);
+		 	assertEquals(1, result);
+		} catch (Exception e) {			
+			fail("An Exception was thrown during insert attempt! " + e.getMessage());
+		}
+	}
+	
+	@Test
+	public void testDoUpdate() {
+		i.setIngredientName("All Purpose Flour");
+		try {
+			int result = repo.doUpdate(i);
+			assertEquals(1, result);
+		} catch (Exception e) {
+			fail("Exception thrown on update! " + e.getMessage());
+		}
+	}
+	
+	@Test
 	public void testDoFetchAll() {
 		//Test executing a select statement from the IngredientRepository class.
 		try {
@@ -60,10 +95,10 @@ public class TestRepository {
 			assertNotNull(ingredients);
 			for (Integer i : ingredients.keySet()) {
 				Ingredient theIng = ingredients.get(i);
-				System.out.println(theIng.getID() + theIng.getIngredientName());
+				System.out.println(theIng.getID() + " " + theIng.getIngredientName());
 			}
 		} catch (Exception e) {
-			fail("Exception thrown! " + e.getMessage());
+			fail("Exception thrown on fetchAll()! " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
@@ -74,19 +109,41 @@ public class TestRepository {
 		try {
 			i = repo.fetch(1);
 			assertNotNull(i);
+			assertEquals("All Purpose Flour", i.getIngredientName());
+			System.out.println(i.getID() + ", " + i.getIngredientName());
 		} catch (Exception e) {
 			fail("Exception thrown from testFetchID() " + e.getMessage());
-			e.printStackTrace();
 		}
 	}
 
 	@Test
-	public void testFetchOneName() {
-		fail("Not yet implemented");
+	public void testFetchName() {
+		String nameToFetch = "All Purpose Flour";
+		List<Ingredient> returned = new ArrayList<Ingredient>();
+		try {
+			returned = repo.fetchName(nameToFetch);
+			assertEquals(nameToFetch, returned.get(0).getIngredientName());
+			assertEquals(returned.size(), 1);
+			System.out.println(returned.get(0).getID() + ", " + returned.get(0).getIngredientName());
+		} catch(Exception e) {
+			fail("Exception thrown on fetchName()! " + e.getMessage());
+		}
 	}
 
+//	@Test
+//	public void testFetchMultiName() {
+//		fail("Not yet implemented");
+//	}
+
 	@Test
-	public void testFetchMultiName() {
-		fail("Not yet implemented");
+	public void testDoDelete() {
+		int toDelete = 1;
+		try {
+			int rowsDeleted = repo.doDelete(toDelete);
+			assertEquals(1, rowsDeleted);
+		} catch (Exception e) {
+			fail("Exception thrown on delete! " + e.getMessage());
+		}
 	}
+	
 }

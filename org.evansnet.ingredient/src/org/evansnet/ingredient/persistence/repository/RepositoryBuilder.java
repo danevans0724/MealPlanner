@@ -143,6 +143,7 @@ public class RepositoryBuilder {
 		}
 		
 		sqlCreate = sb.toString();
+		javaLogger.logp(Level.INFO, class_name, "buildTable()", "Created create table DDL \n" + sb.toString());
 		
 		if (conn == null || conn.isClosed()) {		
 			if (database.getCredentials().getUserID().isEmpty()) {
@@ -150,17 +151,25 @@ public class RepositoryBuilder {
 				throw new SQLException("No credentials available for repository build.");
 				//TODO: Get credentials for the connection if not already defined.
 			}
+			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Connecting to repository database..." );
 			conn = database.connect(connStr);
 		}
 		
 		Statement st = conn.createStatement();
 		try {
+			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Executing DDL statement...");
 			st.executeUpdate(sqlCreate);
+			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Successfully created repository table.");
 		} catch (SQLException e) {
-			RepositoryHelper helper = new RepositoryHelper(database);
-			javaLogger.log(Level.SEVERE, "An error occurred while creating the repository table. ");
-			helper.showErrMessageBox("Create Repository Table Error",
-					"The create table statement failed to create the ingredient repository table!");
+//			RepositoryHelper helper = new RepositoryHelper(database);
+			javaLogger.log(Level.SEVERE, "An error occurred while creating the repository table. \n"
+					+ e.getMessage());
+//			helper.showErrMessageBox("Create Repository Table Error",
+//					"The create table statement failed to create the ingredient repository table!");
+		} finally {
+			if (!conn.isClosed()) {
+				conn.close();
+			}
 		}
 	}
 	

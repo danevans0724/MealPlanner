@@ -147,6 +147,8 @@ public class IngredientRepository {
 	 */
 	public Map<Integer, Ingredient> fetchAll() throws Exception {
 		Connection conn = repo.getConnection();
+		if (conn.isClosed() || conn == null) 
+			conn = repo.connect(connStr);
 		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT";
 		Statement stmt = null;
 		stmt = conn.createStatement();
@@ -198,6 +200,13 @@ public class IngredientRepository {
 	 */
 	public List<Ingredient> fetchName(String n) {
 		List<Ingredient> result = new ArrayList<Ingredient>();
+		if (contents.isEmpty()) {
+			try {
+				fetchAll();
+			} catch (Exception e) {
+				javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "fetchName()", "Fetching ingredient list from the repository.");
+			}
+		}
 		for (Ingredient i : contents.values()) {
 			if (i.getIngredientName().equals(n)) {
 				result.add(i);
@@ -211,11 +220,11 @@ public class IngredientRepository {
 	 * @param i The ingredient object that is to be added to the repository.
 	 * @throws Exception 
 	 */
-	public void doInsertNew(Ingredient i) throws Exception {
+	public int doInsertNew(Ingredient i) throws Exception {
 		int rowsInserted = 0;
 		StringBuilder insert = new StringBuilder("INSERT INTO ");
 		insert.append(repo.getSchema() + ".");
-		insert.append(repo.getDatabaseName() + " VALUES(");
+		insert.append("INGREDIENT VALUES(");
 		insert.append(new String(i.getID() + ", "));
 		insert.append("'" + i.getIngredientName() + "', ");
 		insert.append("'" + i.getIngredientDescription() + "', ");
@@ -236,21 +245,35 @@ public class IngredientRepository {
 				insert.append("false");
 			}			
 		}
+		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
+				"Insert statement completed: \n" + insert.toString());
+		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
+				"Connecting to the repository database.");
 		Connection con = repo.getConnection();
+		if (con.isClosed() || con == null) {
+			con = repo.connect(connStr);
+		}
 		Statement stmt = con.createStatement();
 		try {
+			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
+					"Executing insert query");
 			rowsInserted = stmt.executeUpdate(insert.toString());
 			if (rowsInserted > 0) {
 				//The insert was successful so add the ingredient to the map.
 				contents.put(i.getID(), i);
+			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
+					"Inserted " + rowsInserted + " rows successfully.");
 			}
 		} catch (Exception e) {
-			javaLogger.log(Level.SEVERE, THIS_CLASS_NAME, 
-					"Faiied to insert ingredient record. Rows inserted: : " + rowsInserted );
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "doInsertNew()",
+					"Failed to insert ingredient record. Rows inserted:  " + rowsInserted +
+					"\n" + e.getMessage());
 			e.printStackTrace();
+			throw new SQLException(e.getMessage());
 		} finally {
 			con.close();
 		}
+		return rowsInserted;
 	}
 	
 	
@@ -258,17 +281,18 @@ public class IngredientRepository {
 	 * Updates the repository object with the contents of the ingredient object provide.
 	 * @param i The ingredient object that contains the updated data.
 	 */
-	public void doUpdate(Ingredient i) throws SQLException, Exception {
+	public int doUpdate(Ingredient i) throws SQLException, Exception {
+		int rowsUpd;
 		StringBuilder update = new StringBuilder();
 		// Update dbo.ingredient set (id = ingredient.getID())... where ID = i.getID()...
-		update.append("UPDATE " + repo.getSchema() + ".INGREDIENT SET(");
+		update.append("UPDATE " + repo.getSchema() + ".INGREDIENT SET ");
 		update.append("ID=" + i.getID() + ", ");
-		update.append("ING_NAME=" + i.getIngredientName() + ", ");
-		update.append("ING_DESC=" + i.getIngredientDescription() + ", ");
+		update.append("ING_NAME=\'" + i.getIngredientName() + "\', ");
+		update.append("ING_DESC=\'" + i.getIngredientDescription() + "\', ");
 		update.append("UNIT_OF_MEASURE=" + i.getStrUom() + ", ");
 		update.append("PKG_UOM=" + i.getPkgUom() + ", ");
 		update.append("UNIT_PRICE=" + i.getUnitPrice() + ", ");
-		update.append("PKG_PRICE=" + i.getPkgPrice());
+		update.append("PKG_PRICE=" + i.getPkgPrice() + ", ");
 		if(i.isRecipe()) {
 			if (repo.getDBMS().equals(DBType.MS_SQLSrv)) {
 				update.append("IS_RECIPE=1");				
@@ -282,31 +306,57 @@ public class IngredientRepository {
 				update.append("IS_RECIPE=false");
 			}
 		}
-		update.append(")");
+		update.append(" WHERE ID=" + i.getID());
 		
+		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()",
+				"Update query constructed: \n" + update.toString());
+		
+		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()", "Connecting to repository table. ");
 		Connection conn = repo.getConnection();
-		Statement s = conn.createStatement();
-		int rowsUpd = s.executeUpdate(update.toString());
-		if(rowsUpd < 1) {
-			throw new SQLException("An error occurred while updating ingredient with ID " + i.getID());
+		if (conn.isClosed() || conn == null) {
+			conn = repo.connect(connStr);
 		}
-		conn.close();
+		Statement s = conn.createStatement();
+		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()", 
+				"Executing update query.");
+		try {
+			rowsUpd = s.executeUpdate(update.toString());
+			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()", "Successfully updated record.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new SQLException("An error occurred while updating ingredient with ID " + i.getID());
+		} finally {
+			conn.close();
+		}
+		return rowsUpd;
 	}
 	
 	/**
 	 * Removes the ingredient with the ID provided from the repository
 	 * @param i The integer ID value of the ingredient
 	 */
-	public void doDelete(int i) throws SQLException, Exception {
+	public int doDelete(int i) throws SQLException, Exception {
+		int rowsDel = -1;
 		StringBuilder delete = new StringBuilder("DELETE FROM " + repo.getSchema() + "." +
 				"INGREDIENT WHERE ID = " + i);
 		Connection conn = repo.getConnection();
-		Statement s = conn.createStatement();
-		int rowsDel = s.executeUpdate(delete.toString());
-		if (rowsDel < 1) {
-			throw new SQLException("An error occurred while deleting ingredient with ID " + i);
+		try {
+			if (conn.isClosed()) {
+				conn = repo.connect(connStr);
+			}
+			Statement s = conn.createStatement();
+			rowsDel = s.executeUpdate(delete.toString());
+			contents.remove(i);		// Remove the ingredient from the map.
+			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doDelete()", 
+					"Successfully deleted ingredient with ID = " + i);
+		} catch (Exception e) {
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "doDelete()", 
+					"An error occurred while deleting ingredient with ID " + i +
+					" \n" + e.getMessage());
+		} finally {
+			conn.close();
 		}
-		conn.close();
+		return rowsDel;
 	}
 	
 	/**
@@ -316,14 +366,27 @@ public class IngredientRepository {
 	 */
 	public boolean checkExists(int i) throws SQLException, Exception {
 		Connection conn = repo.getConnection();
+		if (conn.isClosed()) {
+			repo.connect(connStr);
+		}
 		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT WHERE ID=" + i;
 		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery(s);
-			if (rs.next()) {
-				conn.close();
-				return true;
-			}		
-		conn.close();
+		try {
+			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "checkExist()", 
+					"Checking for existence of ingredient. Executing query.");
+			ResultSet rs = stmt.executeQuery(s);
+				if (rs.next()) {
+					conn.close();
+					return true;
+				}	
+		} catch (Exception e) {
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "checkExist()", 
+					"An exception was thrown while checking for ingredient with ID = " + i +
+					"\n" + e.getMessage());
+			e.printStackTrace();
+		} finally {
+			conn.close();
+		}
 		return false;
 	}
 
