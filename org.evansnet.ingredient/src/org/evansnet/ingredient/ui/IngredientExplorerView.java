@@ -48,6 +48,7 @@ public class IngredientExplorerView extends ViewPart {
 		 * Use the result set to populate the hash map from the result set.
 		 * spin through the hash map and populate the tree.
 		 */
+		
 	}
 	
 	public void setRepository(IngredientRepository r) {
