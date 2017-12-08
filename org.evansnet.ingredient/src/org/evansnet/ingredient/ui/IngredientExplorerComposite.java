@@ -3,11 +3,19 @@ package org.evansnet.ingredient.ui;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Tree;
+import org.evansnet.ingredient.ui.providers.IngredientTreeContentProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeNodeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
+
 
 public class IngredientExplorerComposite extends Composite {
+	
+	TreeViewer treeviewer;
+	ITreeContentProvider treeContent;
 
 	/**
 	 * Create the composite.
@@ -21,8 +29,8 @@ public class IngredientExplorerComposite extends Composite {
 		Label lblThisIsTo = new Label(this, SWT.NONE);
 		lblThisIsTo.setText("This is to test the composite");
 		
-		Tree tree = new Tree(this, SWT.BORDER);
-		tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		treeviewer = new TreeViewer(this);
+		treeviewer.setContentProvider(treeContent = new IngredientTreeContentProvider());
 
 	}
 
