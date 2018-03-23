@@ -47,19 +47,19 @@ public class PersistenceProvider {
 	Ingredient ingredient;
 	ProgressBar progress;		//TODO: implement the progress bar for connection operation.
 	
-	public PersistenceProvider() {
+	public PersistenceProvider() throws Exception {
 		repository = getRepository(); //Set the repository to the default 
 		host = new Host();
 		db = new DBMS();
 		ingredient = new Ingredient();
 	}
 	
-	public PersistenceProvider(Shell s) {
+	public PersistenceProvider(Shell s) throws Exception {
 		this();
 		connectDialog = new ConnectionDialog(s, SWT.NONE);	
 	}
 	
-	public PersistenceProvider(Shell shell, Ingredient i, IngredientPersistenceAction a) {
+	public PersistenceProvider(Shell shell, Ingredient i, IngredientPersistenceAction a) throws Exception {
 		this(shell);
 		ingredient = i;
 	}
@@ -109,7 +109,7 @@ public class PersistenceProvider {
 		repository = ing;
 	}
 	
-	private IngredientRepository getRepository() {
+	private IngredientRepository getRepository() throws Exception {
 		// If repository hasn't been set yet, get the default.
 		if (repository == null) {
 			repository = new IngredientRepository();

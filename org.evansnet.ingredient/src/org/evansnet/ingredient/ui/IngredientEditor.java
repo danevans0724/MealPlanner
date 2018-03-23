@@ -33,29 +33,31 @@ public class IngredientEditor extends EditorPart {
 	}
 	
 	@Override
-	public void doSave(IProgressMonitor monitor) {
+	public void doSave(IProgressMonitor monitor)  {
+		PersistenceProvider provider;
 		// 1. Get / open a database connection
-		PersistenceProvider provider = new PersistenceProvider(this.ingEditorComposite.getShell(),
-				ingEditorComposite.getIngredient(),
-				IngredientPersistenceAction.Ingredient_Save);
-
+		try {
+			provider = new PersistenceProvider(this.ingEditorComposite.getShell(),
+					ingEditorComposite.getIngredient(),
+					IngredientPersistenceAction.Ingredient_Save);
 		//TODO: Later we should already have connections defined and just use them. 
 		//      For now, we'll get the connection each time. 
 		provider.showConnDialog();
 		// 2. If new ingredient, create insert statement, // TODO: Write routine to check for existing
 		// 3. otherwise, create update statement.
 		// 4. Write data to the table.
-		try {
 			provider.doSave();
 			// 5. Close the connection.
 			provider.closeConnection();
 			//TODO: Add new ingredient to the tree list: IngredientExplorerView
 			makeDirty(false);
 			super.firePropertyChange(PROP_DIRTY);
-		} catch (SQLException e) {
+		} catch (SQLException  e) {
 			javaLogger.log(Level.SEVERE, "An error occurred while trying to save an ingredient. \n " +
 				e.getErrorCode() + " " + e.getMessage() );
 			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace(); 	// TODO: Provide a logging message & fail gracefully.
 		}
 	}
 

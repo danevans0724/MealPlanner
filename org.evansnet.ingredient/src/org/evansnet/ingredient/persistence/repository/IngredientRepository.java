@@ -54,9 +54,19 @@ public class IngredientRepository {
 	 * storage.
 	 * @return	The connection string for the default ingredient repository.
 	 */
-	public String fetchDefaultRepo() {
+	public String fetchDefaultRepo() throws Exception {
 		RepositoryHelper helper = new RepositoryHelper();
-		repo = helper.getDefaultRepository();
+		try {
+			repo = helper.getDefaultRepository();
+		} catch (Exception e) {
+			String message = new String(""); 
+			if (repo == null) {
+				message = "The repository is null. Has the default been established?";
+			}
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new Exception("fetchDefaultRepo() failed! \n" + message);
+		}
 		isDefault = true;
 		setRepoName("Default Ingredient Repository");
 		repoVersion = "1.0";
@@ -65,8 +75,8 @@ public class IngredientRepository {
 	}
 	
 	/**
-	 * Retrieve a list of the ingredients stored in the repository table. This
-	 * is uses, among other things, to populate the tree in the ingredient explorer
+	 * Retrieve a hash map containing the ingredients stored in the repository table. This
+	 * is used, among other things, to populate the tree in the ingredient explorer
 	 * view.
 	 * 
 	 * @return A list of the ingredients contained in the repository tree.
@@ -147,7 +157,7 @@ public class IngredientRepository {
 	 */
 	public Map<Integer, Ingredient> fetchAll() throws Exception {
 		Connection conn = repo.getConnection();
-		if (conn.isClosed() || conn == null) 
+		if (conn == null || conn.isClosed()) 
 			conn = repo.connect(connStr);
 		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT";
 		Statement stmt = null;

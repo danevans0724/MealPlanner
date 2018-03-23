@@ -1,38 +1,13 @@
 package org.evansnet.ingredient.ui.providers;
 
-import org.eclipse.jface.viewers.ILazyTreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 
-public class IngredientTreeLableProvider implements ILazyTreeContentProvider {
+import java.util.logging.Logger;
 
-	@Override
-	public void dispose() {
-		// TODO Auto-generated method stub
+import org.eclipse.jface.viewers.LabelProvider;
 
-	}
-
-	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void updateElement(Object parent, int index) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void updateChildCount(Object element, int currentChildCount) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public Object getParent(Object element) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+public class IngredientTreeLableProvider extends LabelProvider {
+	
+	public static final String THIS_CLASS_NAME = IngredientTreeLableProvider.class.getName();
+	public Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
 
 }

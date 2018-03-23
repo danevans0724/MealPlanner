@@ -110,56 +110,61 @@ public class RepositoryBuilder {
 	 * @return A JDBC connection to the database. 
 	 */
 	private Connection buildConnection() {
-		PersistenceProvider persistor = new PersistenceProvider(
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-		persistor.showConnDialog();
-		database = persistor.getDb();
-		connStr = database.getConnectionString();
-		conn = persistor.getDb().getConnection();
+		try {
+			PersistenceProvider persistor = new PersistenceProvider(
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+			persistor.showConnDialog();
+			database = persistor.getDb();
+			connStr = database.getConnectionString();
+			conn = persistor.getDb().getConnection();
+		} catch (Exception e) {
+			e.printStackTrace(); //TODO: Provide a log message and fail gracefully.
+		}
 		return conn;
 	}
 	
 	private void buildTable(Connection c) throws SQLException {
-		if (database.getSchema() == null || database.getSchema().isEmpty()) {
-			database.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.
-		}
-		
-		//First build the create table statement.
-		StringBuilder sb = new StringBuilder("CREATE TABLE ");
-		sb.append("\"" + database.getSchema() + "\".\"INGREDIENT\" (");		//Repository table name is always INGREDIENT
-		sb.append("   ID BIGINT PRIMARY KEY, ");
-		sb.append("   ING_NAME VARCHAR(40) NOT NULL,");
-		sb.append("   ING_DESC VARCHAR(80) NULL,");
-		sb.append("   UNIT_OF_MEASURE BIGINT NULL,");
-		sb.append("   PKG_UOM BIGINT NULL,");
-		sb.append("   UNIT_PRICE DECIMAL(6,2) NULL,");
-		sb.append("	  PKG_PRICE DECIMAL (6,2) NULL,");
-		sb.append("	  IS_RECIPE ");
-		
-		if (database.getDBMS() == DBType.MS_SQLSrv) {
-			sb.append("BIT DEFAULT 0 );" );
-		} else if (database.getDBMS() == DBType.MySQL) {
-			sb.append("BOOLEAN DEFAULT FALSE);");
-		}
-		
-		sqlCreate = sb.toString();
-		javaLogger.logp(Level.INFO, class_name, "buildTable()", "Created create table DDL \n" + sb.toString());
-		
-		if (conn == null || conn.isClosed()) {		
-			if (database.getCredentials().getUserID().isEmpty()) {
-				javaLogger.log(Level.SEVERE, "No credentials are available!", class_name);
-				throw new SQLException("No credentials available for repository build.");
-				//TODO: Get credentials for the connection if not already defined.
-			}
-			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Connecting to repository database..." );
-			conn = database.connect(connStr);
-		}
-		
-		Statement st = conn.createStatement();
 		try {
-			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Executing DDL statement...");
+			if (database.getSchema() == null || database.getSchema().isEmpty()) {
+			database.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.
+		
+			//First build the create table statement.
+			StringBuilder sb = new StringBuilder("CREATE TABLE ");
+			sb.append("\"" + database.getSchema() + "\".\"INGREDIENT\" (");		//Repository table name is always INGREDIENT
+			sb.append("   ID BIGINT PRIMARY KEY, ");
+			sb.append("   ING_NAME VARCHAR(40) NOT NULL,");
+			sb.append("   ING_DESC VARCHAR(80) NULL,");
+			sb.append("   UNIT_OF_MEASURE BIGINT NULL,");
+			sb.append("   PKG_UOM BIGINT NULL,");
+			sb.append("   UNIT_PRICE DECIMAL(6,2) NULL,");
+			sb.append("	  PKG_PRICE DECIMAL (6,2) NULL,");
+			sb.append("	  IS_RECIPE ");
+			
+			if (database.getDBMS() == DBType.MS_SQLSrv) {
+				sb.append("BIT DEFAULT 0 );" );
+			} else if (database.getDBMS() == DBType.MySQL) {
+				sb.append("BOOLEAN DEFAULT FALSE);");
+			}
+			
+			sqlCreate = sb.toString();
+			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Created create table DDL \n" + sb.toString());
+			
+			if (conn == null || conn.isClosed()) {		
+				if (database.getCredentials().getUserID().isEmpty()) {
+					javaLogger.log(Level.SEVERE, "No credentials are available!", class_name);
+					throw new SQLException("No credentials available for repository build.");
+					//TODO: Get credentials for the connection if not already defined.
+				}
+				javaLogger.logp(Level.INFO, class_name, "buildTable()", "Connecting to repository database..." );
+				conn = database.connect(connStr);
+			}
+			
+			Statement st = conn.createStatement();
+			
+				javaLogger.logp(Level.INFO, class_name, "buildTable()", "Executing DDL statement...");
 			st.executeUpdate(sqlCreate);
 			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Successfully created repository table.");
+			}
 		} catch (SQLException e) {
 //			RepositoryHelper helper = new RepositoryHelper(database);
 			javaLogger.log(Level.SEVERE, "An error occurred while creating the repository table. \n"

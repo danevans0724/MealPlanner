@@ -27,7 +27,7 @@
          point="org.eclipse.ui.views">
       <category
             id="org.evansnet.ingredient.views.category"
-            name="org.evansnet.ingredient.views.category">
+            name="Ingredient Views">
       </category>
       <view
             category="org.evansnet.ingredient.views.category"
@@ -41,6 +41,7 @@
       <perspectiveExtension
             targetID="org.evansnet.ingredient.perspective">
          <view
+               closeable="false"
                id="org.evansnet.ingredient.ui.ingredientexplorerview"
                minimized="false"
                ratio=".20"
@@ -85,6 +86,10 @@
                label="Window">
             <command
                   commandId="org.eclipse.ui.window.preferences"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.eclipse.ui.views.showView"
                   style="push">
             </command>
          </menu>

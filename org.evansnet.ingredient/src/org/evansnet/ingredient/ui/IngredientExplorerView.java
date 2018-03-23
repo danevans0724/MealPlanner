@@ -1,13 +1,19 @@
 package org.evansnet.ingredient.ui;
 
-import java.util.TreeMap;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.persistence.repository.IngredientRepository;
+import org.evansnet.ingredient.ui.providers.IngredientTreeContentProvider;
+import org.evansnet.ingredient.ui.providers.IngredientTreeLabelProvider;
 
 
 /**
@@ -19,39 +25,44 @@ import org.evansnet.ingredient.persistence.repository.IngredientRepository;
 public class IngredientExplorerView extends ViewPart {
 	public static final String ID = "org.evansnet.ingredient.ui.ingredientexplorerview";
 	
-	Composite treeComposite;
-	TreeMap<Integer, Ingredient> ingredients;
+	public static final String THIS_CLASS_NAME = "org.evansnet.ingredient.ui.IngredientExplorerView";
+	
+	Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
+	
+	HashMap<Integer, Ingredient> ingredients;
+	TreeViewer treeviewer;
 	IngredientRepository repo;
+	
+	
+	public IngredientExplorerView() {
+		try {
+			repo = new IngredientRepository();
+			repo.setConnectStr(repo.fetchDefaultRepo());
+			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "IngredientRepositoryView()", repo.getRepoName());
+			ingredients = (HashMap<Integer, Ingredient>) repo.fetchAll(); 	//ingredients now holds the repository contents.
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void createPartControl(Composite parent) {
-		treeComposite = new IngredientExplorerComposite(parent, SWT.NONE);
-		ingredients = new TreeMap<Integer, Ingredient>();
-		populate(repo);
+		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "createPartControl", 
+				"Creating ingredient explorer view.");
+		treeviewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 
 	@Override
 	public void setFocus() {
-		treeComposite.setFocus();
+//		treeComposite.setFocus();
 	}
-	
+
 	/**
-	 * Reads the ingredients from the repository table and populates the tree with the contents
-	 * of the table. The ingredients are stored in the hash map with the ID as the key and the 
-	 * ingredient name as the value.
+	 * Sets the ingredient repository to the one specified in the input parameter.
+	 * @param r The ingredient repository to use.
 	 */
-	private void populate(IngredientRepository r) {
-		/*
-		 * Algorithm:
-		 * Ask the repository to connect the database
-		 * Run a select query against the repository.
-		 * Use the result set to populate the hash map from the result set.
-		 * spin through the hash map and populate the tree.
-		 */
-		
-	}
-	
 	public void setRepository(IngredientRepository r) {
+		// TODO: If the repo is reset, then the tree needs to be repopulated.
 		repo = r;
 	}
 }

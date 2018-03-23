@@ -43,21 +43,34 @@ public class RepositoryHelper {
 	 * updates the provided database with the connection details. 
 	 * 
 	 * @param db An IDatabase object to update with the default repository's info
-	 * @return An IDatabase object that contains the information needed to operate the repository.
+	 * @return An IDatabase object that contains the information needed to operate the repository
+	 *            or null if the default repository is not yet defined.
 	 */
-	public IDatabase getDefaultRepository() {	
-		IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
-		connStr = prefStore.getDefaultString(PreferenceConstants.PRE_REPO_CONN_STR);
+	public IDatabase getDefaultRepository() throws Exception {	
 		try {
+			IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
+			connStr = prefStore.getString(PreferenceConstants.PRE_REPO_CONN_STR);
 			declareDbType(parseForDBMS(connStr), connStr);
+			database.getCredentials().setUserID(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID));
+			database.getCredentials().setPassword(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD));
 		} catch (ClassNotFoundException | SQLException e) {
 			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()",
 					"An exception occurred while attempting to get the default repository info from the preference store " + 
 			         e.getMessage());
 			e.printStackTrace();
+		} catch (Exception e) {
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()", 
+					"An unidentifed exception occurred while retrieving the default ingredient repo" 
+					+ e.getMessage());
+			throw new Exception("getDefaultRepository failed. " + e.getMessage());
 		}
-		database.getCredentials().setUserID(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_USER_ID));
-		database.getCredentials().setPassword(prefStore.getDefaultString(PreferenceConstants.PRE_REPO_USER_PWD));
+		
+		//TODO: This is a temporary hack to append the user ID and password to the connection string.
+		//      To fix this, refactor this to use the dataconnector connection string factory.
+		String connHack = database.getConnectionString();
+		connHack = connHack + ";user=" + database.getCredentials().getUserID();
+		connHack = connHack + ";password=" + database.getCredentials().getPassword();
+		database.setConnectionString(connHack);
 		return database;
 	}
 	
