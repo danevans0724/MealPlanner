@@ -107,7 +107,7 @@ public class TestRepository {
 	public void testFetchID() {
 		Ingredient i = new Ingredient();
 		try {
-			i = repo.fetch(1);
+			i = repo.fetchById(1);
 			assertNotNull(i);
 			assertEquals("All Purpose Flour", i.getIngredientName());
 			System.out.println(i.getID() + ", " + i.getIngredientName());
@@ -121,7 +121,7 @@ public class TestRepository {
 		String nameToFetch = "All Purpose Flour";
 		List<Ingredient> returned = new ArrayList<Ingredient>();
 		try {
-			returned = repo.fetchName(nameToFetch);
+			returned = repo.fetchByName(nameToFetch);
 			assertEquals(nameToFetch, returned.get(0).getIngredientName());
 			assertEquals(returned.size(), 1);
 			System.out.println(returned.get(0).getID() + ", " + returned.get(0).getIngredientName());

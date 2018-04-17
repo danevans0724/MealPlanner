@@ -26,11 +26,11 @@
    <extension
          point="org.eclipse.ui.views">
       <category
-            id="org.evansnet.ingredient.views.category"
+            id="org.evansnet.ingredient.views"
             name="Ingredient Views">
       </category>
       <view
-            category="org.evansnet.ingredient.views.category"
+            category="org.evansnet.ingredient.views"
             class="org.evansnet.ingredient.ui.IngredientExplorerView"
             id="org.evansnet.ingredient.ui.ingredientexplorerview"
             name="Ingredient Explorer ">
