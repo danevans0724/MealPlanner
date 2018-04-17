@@ -1,45 +1,36 @@
 package org.evansnet.ingredient.ui.providers;
 
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.swt.graphics.Image;
 
-public class IngredientTreeLabelProvider implements ILabelProvider {
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-	@Override
-	public void addListener(ILabelProviderListener listener) {
-		// TODO Auto-generated method stub
+import org.eclipse.jface.viewers.LabelProvider;
+import org.evansnet.ingredient.model.Ingredient;
+import org.evansnet.ingredient.persistence.repository.IngredientRepository;
 
-	}
-
-	@Override
-	public void dispose() {
-		// TODO Dispose of any graphics and OS items.
-
-	}
-
-	@Override
-	public boolean isLabelProperty(Object element, String property) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void removeListener(ILabelProviderListener listener) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Image getImage(Object element) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
+public class IngredientTreeLabelProvider extends LabelProvider {
+	
+	public static final String THIS_CLASS_NAME = IngredientTreeLabelProvider.class.getName();
+	public Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
+	
+	/**
+	 * Get the ingredient names for the ingredient explorer tree.
+	 * @param element An object that provides the tree node string.
+	 * @return The name of the ingredient as a string.
+	 */
+	@SuppressWarnings("rawtypes")
 	public String getText(Object element) {
-		// TODO Auto-generated method stub
-		return null;
+		if (element instanceof IngredientRepository) {
+			return "Ingredients";
+		} else if (element instanceof Object[]) {
+			String i = ((Ingredient)element).getIngredientName();
+			return i;
+		} else if (element instanceof String) {
+			return (String)element;
+		} else
+			javaLogger.logp(Level.FINE, THIS_CLASS_NAME, "getText()", 
+					"Invalid value, returning null");
+		return "Sorry didn't work " + element.getClass();			
 	}
-
 }

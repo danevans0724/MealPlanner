@@ -87,6 +87,7 @@ public class IngredientRepository {
 		} else {
 			try {
 				fetchAll();
+				return (HashMap<Integer, Ingredient>) contents;
 			} catch (Exception e) {
 				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getTreeIngredients()" ,
 						"An exception was thrown when retrieving ingredients from the repository " +
@@ -163,10 +164,9 @@ public class IngredientRepository {
 		Statement stmt = null;
 		stmt = conn.createStatement();
 		resultSet = stmt.executeQuery(s);
-
-		
-		Ingredient i = new Ingredient();
+	
 		while (resultSet.next()) {
+			Ingredient i = new Ingredient();
 			i.setID(resultSet.getInt("ID"));
 			i.setIngredientName(resultSet.getString("ING_NAME"));
 			i.setIngredientDescription(resultSet.getString("ING_DESC"));
@@ -189,7 +189,7 @@ public class IngredientRepository {
 	 * @return The ingredient with the matching ID or null if the id is not found.
 	 * @throws Exception
 	 */
-	public Ingredient fetch(int id) throws Exception {
+	public Ingredient fetchById(int id) throws Exception {
 		if (contents.isEmpty()) {
 			fetchAll();
 		}
@@ -208,7 +208,7 @@ public class IngredientRepository {
 	 * @param n A string value representing the ingredient name to search for.
 	 * @return A HashMap that contains the ingredients that have the name provided.
 	 */
-	public List<Ingredient> fetchName(String n) {
+	public List<Ingredient> fetchByName(String n) {
 		List<Ingredient> result = new ArrayList<Ingredient>();
 		if (contents.isEmpty()) {
 			try {
