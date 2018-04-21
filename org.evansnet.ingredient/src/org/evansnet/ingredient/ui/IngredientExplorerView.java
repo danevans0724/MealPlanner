@@ -1,10 +1,13 @@
 package org.evansnet.ingredient.ui;
 
-import java.util.Map;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
@@ -47,11 +50,24 @@ public class IngredientExplorerView extends ViewPart {
 		treeviewer.setLabelProvider(new IngredientTreeLabelProvider());
 		treeviewer.setContentProvider(new IngredientTreeContentProvider());
 		treeviewer.setInput(repo);
+		
+		treeviewer.addDoubleClickListener(event -> {
+			Viewer viewer = event.getViewer();
+			ISelection sel = viewer.getSelection();
+			if (!(sel.isEmpty()) && sel instanceof IStructuredSelection) {
+				//TODO: Put code to call the ingredient into the editor here.
+				Object ing = ((IStructuredSelection)sel).getFirstElement();
+				if (ing instanceof String) {
+					List<Ingredient> selectedIng = repo.fetchByName((String)ing);
+					// We have the ingredient, now open the editor and put it in.
+					
+				}
+			}
+		});
 	}
 
 	@Override
 	public void setFocus() {
-//		treeComposite.setFocus();
 	}
 
 	/**

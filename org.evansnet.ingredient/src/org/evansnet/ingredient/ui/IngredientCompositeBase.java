@@ -41,7 +41,7 @@ public class IngredientCompositeBase extends Composite {
 	public static final String strPkgUnitOfMeasure = "PKG_UNIT_OF_MEASURE";
 	
 	
-	@SuppressWarnings("unused")
+
 	private DataBindingContext m_bindingContext;
 	private Text txtIngredientName;
 	private Text txtIngredientDescription;
@@ -55,7 +55,7 @@ public class IngredientCompositeBase extends Composite {
 	private IngredientType ingredientTypes;
 	public static ModifyListener modifyListener;
 	
-	Ingredient ingredient = new Ingredient();
+	Ingredient ingredient;
 	
 	// Temporary objects remove and re-code when UOM is available.
 	List<String> uom = new ArrayList<String>();
@@ -68,7 +68,7 @@ public class IngredientCompositeBase extends Composite {
 	 * @param parent
 	 * @param style
 	 */
-	public IngredientCompositeBase(Composite parent, int style) {
+	public IngredientCompositeBase(Composite parent, int style, Ingredient i) {
 		super(parent, style);
 		
 		modifyListener = new ModifyListener() {
@@ -88,6 +88,13 @@ public class IngredientCompositeBase extends Composite {
 				}
 			}
 		};
+		
+		if (i == null) {
+			ingredient = new Ingredient();
+		} else {
+			// An ingredient is passed in if one was selected from the tree. Allows editing.
+			ingredient = i;
+		}
 		
 		setLayout(new GridLayout(4, false));
 		uom.add("ounce");
@@ -250,7 +257,7 @@ public class IngredientCompositeBase extends Composite {
 	}
 	
 	private void setDirty(boolean b) {
-		dirty = true;		//TODO: The dirty flag in the composite. Do I need this?
+		dirty = true;		
 		IngredientEditor ce =  (IngredientEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 		ce.makeDirty(true);
 	}
@@ -302,44 +309,45 @@ public class IngredientCompositeBase extends Composite {
 		}
 	}
 	protected DataBindingContext initDataBindings() {
-		DataBindingContext bindingContext = new DataBindingContext();
+//		DataBindingContext bindingContext = new DataBindingContext();
+		m_bindingContext = new DataBindingContext();
 		//
 		IObservableValue observeTextTxtUnitPriceObserveWidget = WidgetProperties.text(SWT.Modify).observe(txtUnitPrice);
 		IObservableValue unitPriceIngredientObserveValue = PojoProperties.value("unitPrice").observe(ingredient);
-		bindingContext.bindValue(observeTextTxtUnitPriceObserveWidget, unitPriceIngredientObserveValue, null, null);
+		m_bindingContext.bindValue(observeTextTxtUnitPriceObserveWidget, unitPriceIngredientObserveValue, null, null);
 		//
 		IObservableValue observeTextCmbTypeObserveWidget = WidgetProperties.text().observeDelayed(4, cmbType);
 		IObservableValue typeNameIngredientTypesObserveValue = PojoProperties.value("typeName").observe(ingredientTypes);
-		bindingContext.bindValue(observeTextCmbTypeObserveWidget, typeNameIngredientTypesObserveValue, null, null);
+		m_bindingContext.bindValue(observeTextCmbTypeObserveWidget, typeNameIngredientTypesObserveValue, null, null);
 		//
 		IObservableValue observeTextTxtPackagePriceObserveWidget = WidgetProperties.text(SWT.Modify).observe(txtPackagePrice);
 		IObservableValue pkgPriceIngredientObserveValue = PojoProperties.value("pkgPrice").observe(ingredient);
-		bindingContext.bindValue(observeTextTxtPackagePriceObserveWidget, pkgPriceIngredientObserveValue, null, null);
+		m_bindingContext.bindValue(observeTextTxtPackagePriceObserveWidget, pkgPriceIngredientObserveValue, null, null);
 		//
 		IObservableValue observeTextCmbPkgUomObserveWidget = WidgetProperties.text().observe(cmbPkgUom);
 		IObservableValue pkgUomIngredientObserveValue = PojoProperties.value("pkgUom").observe(ingredient);
-		bindingContext.bindValue(observeTextCmbPkgUomObserveWidget, pkgUomIngredientObserveValue, null, null);
+		m_bindingContext.bindValue(observeTextCmbPkgUomObserveWidget, pkgUomIngredientObserveValue, null, null);
 		//
 		IObservableValue observeTextCmbUomObserveWidget = WidgetProperties.text().observe(cmbUom);
 		IObservableValue strUomIngredientObserveValue = PojoProperties.value("strUom").observe(ingredient);
-		bindingContext.bindValue(observeTextCmbUomObserveWidget, strUomIngredientObserveValue, null, null);
+		m_bindingContext.bindValue(observeTextCmbUomObserveWidget, strUomIngredientObserveValue, null, null);
 		//
 		IObservableValue observeSelectionBtnHasARecipe_1ObserveWidget = WidgetProperties.selection().observe(btnHasARecipe_1);
 		IObservableValue recipeIngredientObserveValue = PojoProperties.value("recipe").observe(ingredient);
-		bindingContext.bindValue(observeSelectionBtnHasARecipe_1ObserveWidget, recipeIngredientObserveValue, null, null);
+		m_bindingContext.bindValue(observeSelectionBtnHasARecipe_1ObserveWidget, recipeIngredientObserveValue, null, null);
 		//
 		IObservableValue observeTextTxtIngredientNameObserveWidget_1 = WidgetProperties.text(SWT.Modify).observe(txtIngredientName);
 		IObservableValue ingredientNameIngredientObserveValue = PojoProperties.value("ingredientName").observe(ingredient);
-		bindingContext.bindValue(observeTextTxtIngredientNameObserveWidget_1, ingredientNameIngredientObserveValue, null, null);
+		m_bindingContext.bindValue(observeTextTxtIngredientNameObserveWidget_1, ingredientNameIngredientObserveValue, null, null);
 		//
 		IObservableValue observeTextTxtIngredientDescriptionObserveWidget = WidgetProperties.text(SWT.Modify).observe(txtIngredientDescription);
 		IObservableValue ingredientDescriptionIngredientObserveValue = PojoProperties.value("ingredientDescription").observe(ingredient);
-		bindingContext.bindValue(observeTextTxtIngredientDescriptionObserveWidget, ingredientDescriptionIngredientObserveValue, null, null);
+		m_bindingContext.bindValue(observeTextTxtIngredientDescriptionObserveWidget, ingredientDescriptionIngredientObserveValue, null, null);
 		//
 		
-		// Show the state of the model
+		// Show the state of the model. Simply used for debug. Remove after complete.
 		showModel();
 		
-		return bindingContext;
+		return m_bindingContext;
 	}
 }
