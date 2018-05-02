@@ -17,7 +17,7 @@ import org.evansnet.ingredient.persistence.PersistenceProvider;
 
 
 /**
- * The editor for Ingredients.
+ * The editor for Ingredients. 
  * 
  * @author pmidce0
  *

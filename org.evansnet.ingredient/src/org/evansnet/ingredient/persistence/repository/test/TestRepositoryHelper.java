@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.jmock.Mockery;
+//import org.jmock.Mockery;
 
 import org.junit.After;
 import org.junit.Before;
@@ -19,7 +19,7 @@ import org.evansnet.ingredient.persistence.repository.RepositoryHelper;
 
 public class TestRepositoryHelper {
 
-	Mockery mockery = new Mockery();
+//	Mockery mockery = new Mockery();
 	HashMap<DBType, String> connStrings;
 	ArrayList<String> credentialTestStrings;
 	IDatabase database;
@@ -50,7 +50,7 @@ public class TestRepositoryHelper {
 	public void tearDown() throws Exception {
 		database = null;
 		credentialTestStrings = null;
-		mockery = null;
+//		mockery = null;
 	}
 
 	@Test

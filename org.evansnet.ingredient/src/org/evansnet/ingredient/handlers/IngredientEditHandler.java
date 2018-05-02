@@ -6,9 +6,16 @@ import java.util.logging.Logger;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.internal.EditorSite;
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.ui.IngredientEditor;
 import org.evansnet.ingredient.ui.IngredientInput;
@@ -24,6 +31,7 @@ import org.evansnet.ingredient.ui.IngredientInput;
 public class IngredientEditHandler extends AbstractHandler {
 	
 	public static final String THIS_CLASS_NAME = IngredientEditHandler.class.getName();
+	public static final String ID = THIS_CLASS_NAME;
 	public static Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
 	
 	IngredientInput input;
@@ -34,24 +42,26 @@ public class IngredientEditHandler extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-		IWorkbenchPage thisPage = window.getActivePage();
-		
+		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		IWorkbenchPage activePage = window.getActivePage();
+		//We have the window, now open and fill it.
 		try {
-			if (input == null) {
+	 		if (!(input == null)) {
+				IEditorPart editor = activePage.getActiveEditor();
+				if (editor == null) {
+					Ingredient i = input.getIngredient();
+					editor = new IngredientEditor(i);	
+				}
+				activePage.openEditor(input, IngredientEditor.ID);
+			} else {
 				String message = new String("ERROR! Input for the editor is empty!");
 				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "execute()", 
 						message);
 				throw new Exception(message);
-			} else {
-				thisPage.openEditor(input, IngredientEditor.ID);
 			}
-		} catch (Exception e) {
-			//Already threw it. 
+		} catch (Exception e) { 
 			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "execute()", e.toString());
 		}
 		return null;
 	}
-
-
 }

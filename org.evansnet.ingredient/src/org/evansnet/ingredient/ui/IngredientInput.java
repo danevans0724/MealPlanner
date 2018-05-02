@@ -44,7 +44,7 @@ public class IngredientInput implements IEditorInput {
 
 	@Override
 	public Object getAdapter(Class adapter) {
-		// TODO Auto-generated method stub
+		// Not implemented
 		return null;
 	}
 	
@@ -79,6 +79,10 @@ public class IngredientInput implements IEditorInput {
 	@Override
 	public String getToolTipText() {
 		return "The ingredient to create or edit.";
+	}
+
+	public Ingredient getIngredient() {
+		return ingredient;
 	}
 
 

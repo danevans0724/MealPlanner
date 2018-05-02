@@ -128,7 +128,7 @@
       <command
             categoryId="org.evansnet.ingredient.category"
             description="Change an ingredient"
-            id="org.evansnet.ingredient.command.editingredient"
+            id="org.evansnet.ingredient.command.ingredient.edit"
             name="Edit Ingredient">
       </command>
    </extension>
@@ -154,7 +154,7 @@
       </handler>
       <handler
             class="org.evansnet.ingredient.handlers.IngredientEditHandler"
-            commandId="org.evansnet.ingredient.command.editingredient">
+            commandId="org.evansnet.ingredient.command.ingredient.edit">
       </handler>
    </extension>
    <extension
