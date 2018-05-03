@@ -82,6 +82,7 @@ public class PersistenceProvider {
 	 */
 	public void showConnDialog() {
 		db = (IDatabase)connectDialog.open();
+		//TODO: Change this method to use the repository classes. 
 	}
 	
 	public void doSave() throws SQLException {
