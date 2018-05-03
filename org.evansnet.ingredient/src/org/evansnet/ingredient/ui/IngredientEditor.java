@@ -76,6 +76,10 @@ public class IngredientEditor extends EditorPart {
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		if (!(input instanceof IngredientInput) || input == null) {
+			throw new RuntimeException("IngredientEditor; Wrong input!!");
+		}
+		this.ingredient = ((IngredientInput) input).getIngredient();
 		setSite(site);
 		setInput(input);
 	}

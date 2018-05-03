@@ -66,7 +66,8 @@ public class IngredientExplorerView extends ViewPart {
 				if (ing instanceof String) {
 					List<Ingredient> selectedIng = repo.fetchByName((String)ing);
 					Map<String, String> parms = new HashMap<String, String>();
-						IngredientInput input = new IngredientInput(selectedIng.get(0));
+						IngredientInput input = new IngredientInput(selectedIng.get(0)); //TODO: Handle index
+
 						parms.put("input", input.getName());
 						if(!(ing == null)) {
 							System.out.println("I selected something!");

@@ -258,8 +258,8 @@ public class IngredientCompositeBase extends Composite {
 	
 	private void setDirty(boolean b) {
 		dirty = true;		
-		IngredientEditor ce =  (IngredientEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
-		ce.makeDirty(true);
+//		IngredientEditor ce =  (IngredientEditor)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+//		ce.makeDirty(true);
 	}
 	
 	/**
