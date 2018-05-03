@@ -1,13 +1,22 @@
 package org.evansnet.ingredient.ui;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.part.ViewPart;
+import org.evansnet.ingredient.handlers.IngredientEditHandler;
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.persistence.repository.IngredientRepository;
 import org.evansnet.ingredient.ui.providers.IngredientTreeContentProvider;
@@ -27,6 +36,7 @@ public class IngredientExplorerView extends ViewPart {
 	
 	TreeViewer treeviewer;
 	IngredientRepository repo;
+	ISelectionService selectionService;
 	
 	
 	public IngredientExplorerView() {
@@ -47,11 +57,40 @@ public class IngredientExplorerView extends ViewPart {
 		treeviewer.setLabelProvider(new IngredientTreeLabelProvider());
 		treeviewer.setContentProvider(new IngredientTreeContentProvider());
 		treeviewer.setInput(repo);
+		
+		treeviewer.addDoubleClickListener(event -> {
+			Viewer viewer = event.getViewer();
+			IStructuredSelection sel = (IStructuredSelection) viewer.getSelection();
+			if (!(sel.isEmpty()) && sel instanceof IStructuredSelection) {
+				Object ing = ((IStructuredSelection)sel).getFirstElement();
+				if (ing instanceof String) {
+					List<Ingredient> selectedIng = repo.fetchByName((String)ing);
+					Map<String, String> parms = new HashMap<String, String>();
+						IngredientInput input = new IngredientInput(selectedIng.get(0)); //TODO: Handle index
+
+						parms.put("input", input.getName());
+						if(!(ing == null)) {
+							System.out.println("I selected something!");
+							ICommandService cmdSrv = this.getViewSite().getWorkbenchWindow()
+									.getService(ICommandService.class);
+							Command cmd = cmdSrv.getCommand("org.evansnet.ingredient.command.ingredient.edit");
+							ExecutionEvent editEvent = new ExecutionEvent(cmd, parms, this, null);
+							try {
+								cmd.setHandler(new IngredientEditHandler(input));
+								cmd.executeWithChecks(editEvent);
+							} catch (Exception e) {
+								javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "treeviewer.addDoubleClickListener()", 
+										"An exceptionn occured while trying to open the ingredient editor " + e.getMessage());
+								e.printStackTrace();
+							}
+					}
+				}
+			}
+		});
 	}
 
 	@Override
 	public void setFocus() {
-//		treeComposite.setFocus();
 	}
 
 	/**

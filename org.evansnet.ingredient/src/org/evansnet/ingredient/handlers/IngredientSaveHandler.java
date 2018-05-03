@@ -23,7 +23,7 @@ public class IngredientSaveHandler extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		System.out.println("Saving an ingredient!");
-		// TODO Activate the progress monitor in the GUI, (this), thread.
+		// TODO Activate the progress monitor in the GUI, (this), thread. Ref: eclipse JOB framework.
 		
 		monitor = SubMonitor.convert(monitor);
 		// 1. Insure the editor is open. Else error message & clear state

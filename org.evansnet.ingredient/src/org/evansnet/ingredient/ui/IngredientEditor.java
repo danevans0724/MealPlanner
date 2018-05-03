@@ -11,12 +11,13 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
+import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.persistence.IngredientPersistenceAction;
 import org.evansnet.ingredient.persistence.PersistenceProvider;
 
 
 /**
- * The editor for Ingredients.
+ * The editor for Ingredients. 
  * 
  * @author pmidce0
  *
@@ -25,11 +26,18 @@ public class IngredientEditor extends EditorPart {
 	
 	public static final String ID = "org.evansnet.ingredient.ingredienteditor";	
 	public static Logger javaLogger = Logger.getLogger("Ingredient editor logger");
+	Ingredient ingredient;
 	IngredientCompositeBase ingEditorComposite;
 	boolean dirty = false;
 
 	public IngredientEditor() {
 		super();
+		ingredient = new Ingredient();
+	}
+	
+	public IngredientEditor(Ingredient i) {
+		this();
+		setIngredient(i);
 	}
 	
 	@Override
@@ -68,6 +76,10 @@ public class IngredientEditor extends EditorPart {
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		if (!(input instanceof IngredientInput) || input == null) {
+			throw new RuntimeException("IngredientEditor; Wrong input!!");
+		}
+		this.ingredient = ((IngredientInput) input).getIngredient();
 		setSite(site);
 		setInput(input);
 	}
@@ -75,6 +87,10 @@ public class IngredientEditor extends EditorPart {
 	@Override
 	public boolean isDirty() {
 		return dirty;
+	}
+	
+	public void setIngredient(Ingredient i) {
+		ingredient = i;
 	}
 	
 	public void makeDirty(boolean b) {
@@ -90,7 +106,7 @@ public class IngredientEditor extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-		ingEditorComposite = new IngredientCompositeBase(parent, SWT.NONE);		
+		ingEditorComposite = new IngredientCompositeBase(parent, SWT.NONE, ingredient);		
 	}
 
 	@Override

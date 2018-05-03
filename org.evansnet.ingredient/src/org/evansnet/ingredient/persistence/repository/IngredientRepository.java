@@ -206,7 +206,7 @@ public class IngredientRepository {
 	 * repository table that have the name requested. 
 	 * 
 	 * @param n A string value representing the ingredient name to search for.
-	 * @return A HashMap that contains the ingredients that have the name provided.
+	 * @return An ArrayList that contains the ingredients that have the name provided.
 	 */
 	public List<Ingredient> fetchByName(String n) {
 		List<Ingredient> result = new ArrayList<Ingredient>();

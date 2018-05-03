@@ -125,6 +125,12 @@
             id="org.evansnet.ingredient.command.ingredient.save"
             name="Save">
       </command>
+      <command
+            categoryId="org.evansnet.ingredient.category"
+            description="Change an ingredient"
+            id="org.evansnet.ingredient.command.ingredient.edit"
+            name="Edit Ingredient">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -145,6 +151,10 @@
       <handler
             class="org.evansnet.ingredient.handlers.IngredientSaveHandler"
             commandId="org.evansnet.ingredient.command.ingredient.save">
+      </handler>
+      <handler
+            class="org.evansnet.ingredient.handlers.IngredientEditHandler"
+            commandId="org.evansnet.ingredient.command.ingredient.edit">
       </handler>
    </extension>
    <extension
