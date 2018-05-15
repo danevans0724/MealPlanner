@@ -58,18 +58,19 @@ public class IngredientRepository {
 		RepositoryHelper helper = new RepositoryHelper();
 		try {
 			repo = helper.getDefaultRepository();
+			if (repo == null) {
+				//Null means no default is defined. Create a default repo.
+			}
 		} catch (Exception e) {
 			String message = new String(""); 
 			if (repo == null) {
 				message = "The repository is null. Has the default been established?";
 			}
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new Exception("fetchDefaultRepo() failed! \n" + message);
 		}
 		isDefault = true;
 		setRepoName("Default Ingredient Repository");
-		repoVersion = "1.0";
 		connStr = repo.getConnectionString();
 		return connStr;
 	}
@@ -157,9 +158,7 @@ public class IngredientRepository {
 	 * @return A Map object containing the IDs and names of all of the ingredients in the repository.
 	 */
 	public Map<Integer, Ingredient> fetchAll() throws Exception {
-		Connection conn = repo.getConnection();
-		if (conn == null || conn.isClosed()) 
-			conn = repo.connect(connStr);
+		Connection conn = connect();
 		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT";
 		Statement stmt = null;
 		stmt = conn.createStatement();
@@ -174,7 +173,7 @@ public class IngredientRepository {
 			i.setPkgUom(resultSet.getString("PKG_UOM"));
 			i.setUnitPrice(resultSet.getBigDecimal("UNIT_PRICE"));
 			i.setPkgPrice(resultSet.getBigDecimal("PKG_PRICE"));
-			i.setRecipe(resultSet.getBoolean("IS_RECIPE"));
+			i.setIsRecipe(resultSet.getBoolean("IS_RECIPE"));
 		contents.put(i.getID(), i);
 		}
 		conn.close();
@@ -232,10 +231,11 @@ public class IngredientRepository {
 	 */
 	public int doInsertNew(Ingredient i) throws Exception {
 		int rowsInserted = 0;
+		int id = getNextID();
 		StringBuilder insert = new StringBuilder("INSERT INTO ");
 		insert.append(repo.getSchema() + ".");
 		insert.append("INGREDIENT VALUES(");
-		insert.append(new String(i.getID() + ", "));
+		insert.append(id + ", ");
 		insert.append("'" + i.getIngredientName() + "', ");
 		insert.append("'" + i.getIngredientDescription() + "', ");
 		insert.append("'" + i.getStrUom() + "', " );
@@ -259,10 +259,7 @@ public class IngredientRepository {
 				"Insert statement completed: \n" + insert.toString());
 		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
 				"Connecting to the repository database.");
-		Connection con = repo.getConnection();
-		if (con.isClosed() || con == null) {
-			con = repo.connect(connStr);
-		}
+		Connection con = connect();
 		Statement stmt = con.createStatement();
 		try {
 			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
@@ -304,7 +301,7 @@ public class IngredientRepository {
 		update.append("UNIT_PRICE=" + i.getUnitPrice() + ", ");
 		update.append("PKG_PRICE=" + i.getPkgPrice() + ", ");
 		if(i.isRecipe()) {
-			if (repo.getDBMS().equals(DBType.MS_SQLSrv)) {
+			if (repo.getDBMS().equals(DBType.MS_SQLSrv)) { 
 				update.append("IS_RECIPE=1");				
 			} else if (repo.getDBMS().equals(DBType.MySQL)) {
 				update.append("IS_RECIPE=true");
@@ -322,10 +319,7 @@ public class IngredientRepository {
 				"Update query constructed: \n" + update.toString());
 		
 		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()", "Connecting to repository table. ");
-		Connection conn = repo.getConnection();
-		if (conn.isClosed() || conn == null) {
-			conn = repo.connect(connStr);
-		}
+		Connection conn = connect();
 		Statement s = conn.createStatement();
 		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()", 
 				"Executing update query.");
@@ -349,11 +343,8 @@ public class IngredientRepository {
 		int rowsDel = -1;
 		StringBuilder delete = new StringBuilder("DELETE FROM " + repo.getSchema() + "." +
 				"INGREDIENT WHERE ID = " + i);
-		Connection conn = repo.getConnection();
+		Connection conn = connect();
 		try {
-			if (conn.isClosed()) {
-				conn = repo.connect(connStr);
-			}
 			Statement s = conn.createStatement();
 			rowsDel = s.executeUpdate(delete.toString());
 			contents.remove(i);		// Remove the ingredient from the map.
@@ -375,10 +366,7 @@ public class IngredientRepository {
 	 * @param i The ID number of the ingredient to check for
 	 */
 	public boolean checkExists(int i) throws SQLException, Exception {
-		Connection conn = repo.getConnection();
-		if (conn.isClosed()) {
-			repo.connect(connStr);
-		}
+		Connection conn = connect();
 		String s = "SELECT * FROM " + repo.getSchema() + "." + "INGREDIENT WHERE ID=" + i;
 		Statement stmt = conn.createStatement();
 		try {
@@ -427,5 +415,40 @@ public class IngredientRepository {
 			}
 		} 
 		return false;
+	}
+	
+	/** 
+	 * Gets the next ingredient ID to be used from the database. 
+	 * @return The number of ingredients in the table + 1
+	 */
+	private int getNextID() {
+		int lastID = 0;
+		try {
+			Connection conn = connect();
+			String query = "SELECT COUNT(ID) FROM " + repo.getSchema()+ "." + "INGREDIENT" + ";";
+			Statement sqlStatement = conn.createStatement();
+			ResultSet rs = sqlStatement.executeQuery(query);
+			rs.next();
+			lastID = rs.getInt(1); 
+		} catch (SQLException e) {
+			javaLogger.log(Level.SEVERE, "Not able to get the next ingredient ID \n" + 
+		       "Encountered an exception when accessing the database " + 
+					repo.getDatabaseName()+"." + repo.getDatabaseName() + "\n" + 
+		            e.getErrorCode() + " " + e.getMessage());
+		}
+		return ++lastID;
+	}
+	
+	private Connection connect() throws SQLException {
+		Connection conn = repo.getConnection();
+		if (conn == null || conn.isClosed()) {
+			try {
+				conn = repo.connect(repo.getConnectionString());
+			} catch (SQLException e) {
+				throw new SQLException(e.getMessage());
+//				e.printStackTrace();
+			} 
+		}
+		return conn;
 	}
 }
