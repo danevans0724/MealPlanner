@@ -8,6 +8,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
@@ -43,29 +44,21 @@ public class IngredientEditor extends EditorPart {
 	@Override
 	public void doSave(IProgressMonitor monitor)  {
 		PersistenceProvider provider;
-		// 1. Get / open a database connection
 		try {
-			provider = new PersistenceProvider(this.ingEditorComposite.getShell(),
-					ingEditorComposite.getIngredient(),
+			provider = new PersistenceProvider( ingEditorComposite.getIngredient(),
 					IngredientPersistenceAction.Ingredient_Save);
-		//TODO: Later we should already have connections defined and just use them. 
-		//      For now, we'll get the connection each time. 
-		provider.showConnDialog();
-		// 2. If new ingredient, create insert statement, // TODO: Write routine to check for existing
-		// 3. otherwise, create update statement.
-		// 4. Write data to the table.
 			provider.doSave();
-			// 5. Close the connection.
-			provider.closeConnection();
 			//TODO: Add new ingredient to the tree list: IngredientExplorerView
+			// since we have a repository, we should be able to fire an event to update the tree.
 			makeDirty(false);
-			super.firePropertyChange(PROP_DIRTY);
 		} catch (SQLException  e) {
-			javaLogger.log(Level.SEVERE, "An error occurred while trying to save an ingredient. \n " +
+			javaLogger.log(Level.SEVERE, "An SQL Exception occurred while trying to save an ingredient. \n " +
 				e.getErrorCode() + " " + e.getMessage() );
 			e.printStackTrace();
 		} catch (Exception e) {
-			e.printStackTrace(); 	// TODO: Provide a logging message & fail gracefully.
+			javaLogger.logp(Level.SEVERE, ID, "doSave()", 
+					"An unexpected exception occurred during save. " + e.getMessage());
+			e.printStackTrace(); 
 		}
 	}
 
@@ -94,8 +87,8 @@ public class IngredientEditor extends EditorPart {
 	}
 	
 	public void makeDirty(boolean b) {
-		dirty = true;
-		super.firePropertyChange(PROP_DIRTY);
+		dirty = b;
+		firePropertyChange(IEditorPart.PROP_DIRTY);
 	}
 
 	@Override

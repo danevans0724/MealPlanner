@@ -70,7 +70,6 @@ public class IngredientExplorerView extends ViewPart {
 
 						parms.put("input", input.getName());
 						if(!(ing == null)) {
-							System.out.println("I selected something!");
 							ICommandService cmdSrv = this.getViewSite().getWorkbenchWindow()
 									.getService(ICommandService.class);
 							Command cmd = cmdSrv.getCommand("org.evansnet.ingredient.command.ingredient.edit");

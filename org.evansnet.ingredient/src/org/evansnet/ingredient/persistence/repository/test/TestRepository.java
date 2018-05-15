@@ -55,7 +55,7 @@ public class TestRepository {
 		i.setUnitPrice(new BigDecimal("0.26"));
 		i.setPkgUom("1");
 		i.setStrUom("1");
-		i.setRecipe(false);
+		i.setIsRecipe(false);
 	}
 
 	@After
