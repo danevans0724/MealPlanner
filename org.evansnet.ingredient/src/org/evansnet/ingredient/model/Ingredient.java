@@ -83,10 +83,16 @@ public class Ingredient {
 		this.pkgPrice = p;
 		pcs.firePropertyChange("pkgPrice", oldPkgPrice, pkgPrice);
 	}
+
 	public boolean isRecipe() {
 		return isRecipe;
 	}
-	public void setRecipe(boolean b) {
+	
+	public boolean getIsRecipe() {
+		return isRecipe;
+	}
+	
+	public void setIsRecipe(boolean b) {
 		boolean oldIsRecipe = isRecipe;
 		this.isRecipe = b;
 		pcs.firePropertyChange("isRecipe", oldIsRecipe, isRecipe);

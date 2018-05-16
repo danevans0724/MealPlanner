@@ -6,9 +6,11 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
+import org.evansnet.dataconnector.ui.ConnectionDialog;
 import org.evansnet.ingredient.persistence.PersistenceProvider;
 
 /**
@@ -37,6 +39,8 @@ public class RepositoryBuilder {
 	private String 		connStr;		//The connection string provided by the data connector.
 	private Connection 	conn;			//The database connection provided by the data connector.
 	private IngredientRepository repo;	//The newly created ingredient repository.
+	private ConnectionDialog connectionDialog;
+
 	
 	public RepositoryBuilder() {
 		// This constructor gets a connection dialog and subsequently the connection.
@@ -44,7 +48,6 @@ public class RepositoryBuilder {
 		sqlCreate = null;
 		connStr = null;
 		conn = null;
-//		repo = new IngredientRepository();
 	}
 	
 	public RepositoryBuilder(String strConn) {
@@ -92,7 +95,6 @@ public class RepositoryBuilder {
 					"\n See the log for more information.");
 			e.printStackTrace();
 		}
-//		persistConn();		// Store the connection string in the plug-in preferences.
 		return repo;
 	}
 	
@@ -103,22 +105,22 @@ public class RepositoryBuilder {
 	}
 	
 	/**
-	 * Uses the ingredient persistence provider to create a connection definition and to 
-	 * return the connection to the database. This method also sets the IHost type, 
-	 * IDatabase type and connection string for the repository database.
+	 * Used to create a connection definition and to return the connection to the database. 
+	 * In the process, this method sets the IHost type, and connection string for the repository database.
 	 * 
 	 * @return A JDBC connection to the database. 
 	 */
 	private Connection buildConnection() {
 		try {
-			PersistenceProvider persistor = new PersistenceProvider(
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
-			persistor.showConnDialog();
-			database = persistor.getDb();
+			connectionDialog = new ConnectionDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
+			database = (IDatabase)connectionDialog.open();
 			connStr = database.getConnectionString();
-			conn = persistor.getDb().getConnection();
+			conn = database.getConnection();
 		} catch (Exception e) {
-			e.printStackTrace(); //TODO: Provide a log message and fail gracefully.
+			String message = "An exception occurred while creating a connection to the repository";
+			javaLogger.logp(Level.SEVERE, class_name, "buildConnection()", message + "\n" + e.getMessage());
+			e.printStackTrace(); 
+			conn = null;
 		}
 		return conn;
 	}

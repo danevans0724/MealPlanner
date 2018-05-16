@@ -50,6 +50,9 @@ public class RepositoryHelper {
 		try {
 			IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
 			connStr = prefStore.getString(PreferenceConstants.PRE_REPO_CONN_STR);
+			if (connStr == "" || connStr == "Repository JDBC connection string") {
+				return null; 
+			}
 			declareDbType(parseForDBMS(connStr), connStr);
 			database.getCredentials().setUserID(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID));
 			database.getCredentials().setPassword(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD));

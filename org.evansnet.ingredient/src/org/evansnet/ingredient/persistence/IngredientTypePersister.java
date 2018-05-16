@@ -16,7 +16,7 @@ public class IngredientTypePersister extends PersistenceProvider{
 	IngredientPersistenceAction action;
 	
 	public IngredientTypePersister(Shell shell, Ingredient i, IngredientPersistenceAction a) throws Exception {
-		super(shell, i, a);
+		super(i, a);
 		// TODO Add code for getting the database and table to use. 
 		//      Then, call the methods on the parent class to establish the
 		//      connection to the database.
