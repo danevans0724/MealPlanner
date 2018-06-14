@@ -1,13 +1,12 @@
 package org.evansnet.ingredient.ui.providers;
 
 
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.evansnet.ingredient.model.Ingredient;
-import org.evansnet.ingredient.persistence.repository.IngredientRepository;
+import org.evansnet.ingredient.persistence.repository.IRepository;
 
 public class IngredientTreeLabelProvider extends LabelProvider {
 	
@@ -19,9 +18,8 @@ public class IngredientTreeLabelProvider extends LabelProvider {
 	 * @param element An object that provides the tree node string.
 	 * @return The name of the ingredient as a string.
 	 */
-	@SuppressWarnings("rawtypes")
 	public String getText(Object element) {
-		if (element instanceof IngredientRepository) {
+		if (element instanceof IRepository) {
 			return "Ingredients";
 		} else if (element instanceof Object[]) {
 			String i = ((Ingredient)element).getIngredientName();

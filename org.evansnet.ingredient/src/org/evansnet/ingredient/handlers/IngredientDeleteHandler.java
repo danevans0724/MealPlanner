@@ -6,23 +6,20 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.evansnet.ingredient.ui.IngredientEditor;
 
-/**
- * Handles requests to save the ingredient to the database.
- * 
- * @author Dan Evans
- *
- */
-public class IngredientSaveHandler extends AbstractHandler {
-	
+public class IngredientDeleteHandler extends AbstractHandler {
+
 	IProgressMonitor monitor;
-	
+
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		// TODO Activate the progress monitor in the GUI, (this), thread. Ref: eclipse JOB framework.
-		
+		// Remove the ingredient from the repository and close the editor.
 		monitor = SubMonitor.convert(monitor);
-		HandlerUtil.getActiveEditor(event).doSave(monitor);
+		IngredientEditor editor = (IngredientEditor)HandlerUtil.getActiveEditor(event);
+		editor.doDelete();
+		// Close the editor to prevent further action on the deleted ingredient. 
+		editor.getEditorSite().getPage().closeEditor(editor, false);
 		return null;
 	}
 

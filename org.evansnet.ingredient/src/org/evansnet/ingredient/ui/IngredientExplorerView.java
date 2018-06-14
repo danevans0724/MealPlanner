@@ -18,6 +18,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.part.ViewPart;
 import org.evansnet.ingredient.handlers.IngredientEditHandler;
 import org.evansnet.ingredient.model.Ingredient;
+import org.evansnet.ingredient.persistence.repository.IRepository;
 import org.evansnet.ingredient.persistence.repository.IngredientRepository;
 import org.evansnet.ingredient.ui.providers.IngredientTreeContentProvider;
 import org.evansnet.ingredient.ui.providers.IngredientTreeLabelProvider;
@@ -35,7 +36,7 @@ public class IngredientExplorerView extends ViewPart {
 	Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
 	
 	TreeViewer treeviewer;
-	IngredientRepository repo;
+	IRepository repo;
 	ISelectionService selectionService;
 	
 	
@@ -57,16 +58,20 @@ public class IngredientExplorerView extends ViewPart {
 		treeviewer.setLabelProvider(new IngredientTreeLabelProvider());
 		treeviewer.setContentProvider(new IngredientTreeContentProvider());
 		treeviewer.setInput(repo);
-		
+
+		/**
+		 * This listener allows for the selection of an ingredient and its display in 
+		 * the editor. Once in the editor, it can be edited or deleted. 
+		 */
 		treeviewer.addDoubleClickListener(event -> {
 			Viewer viewer = event.getViewer();
 			IStructuredSelection sel = (IStructuredSelection) viewer.getSelection();
 			if (!(sel.isEmpty()) && sel instanceof IStructuredSelection) {
 				Object ing = ((IStructuredSelection)sel).getFirstElement();
 				if (ing instanceof String) {
-					List<Ingredient> selectedIng = repo.fetchByName((String)ing);
+					List<Object> selectedIng = repo.fetchByName((String)ing);
 					Map<String, String> parms = new HashMap<String, String>();
-						IngredientInput input = new IngredientInput(selectedIng.get(0)); //TODO: Handle index
+						IngredientInput input = new IngredientInput((Ingredient)selectedIng.get(0)); 
 
 						parms.put("input", input.getName());
 						if(!(ing == null)) {
@@ -96,9 +101,44 @@ public class IngredientExplorerView extends ViewPart {
 	 * Sets the ingredient repository to the one specified in the input parameter.
 	 * @param r The ingredient repository to use.
 	 */
-	public void setRepository(IngredientRepository r) {
-		// TODO: If the repo is reset, then the tree needs to be repopulated.
+	public void setRepository(IRepository r) {
 		repo = r;
-		//TODO: Fire treeviewer change.
+		refresh(true);
+	}
+
+	/**
+	 * Update the nodes in the tree for add & remove operations.
+	 * @param updateLabels 
+	 */
+	public void refresh(boolean updateLabels) {
+		treeviewer.refresh(updateLabels);
+	}
+	
+	public IRepository getRepo() {
+		return repo;
+	}
+
+	public void setRepo(IRepository repo) {
+		this.repo = repo;
+	}
+	
+	public void removeRepoItem(int i) throws Exception {
+		String nodeToRemove = ((Ingredient)(repo.fetchById(i))).getIngredientName();
+		treeviewer.remove(nodeToRemove);
+		repo.removeMappedItem(i);
+		refresh(true);
+	}
+
+	/**
+	 * Adds an item to the repository map and refreshes the tree to add the item. 
+	 * Note that at this point the item has already been added to the repository table. 
+	 * @param ingredient
+	 * @throws Exception 
+	 */
+	public void addRepoItem(Ingredient ingredient) throws Exception {
+		@SuppressWarnings("unused")
+		Map<Integer, Object> dummy = repo.fetchAll();	// Update the repository. The variable is a dummy. We just want to refresh the map.
+		dummy = null;
+		refresh(true);
 	}
 }

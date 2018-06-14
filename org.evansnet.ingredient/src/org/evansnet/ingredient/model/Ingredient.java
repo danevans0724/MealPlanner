@@ -20,6 +20,7 @@ public class Ingredient {
 	BigDecimal unitPrice;
 	BigDecimal pkgPrice;
 	boolean isRecipe;		// TODO: Add the recipe class reference when Recipe is written.
+	int ingredientType;
 	
 	
 	
@@ -98,6 +99,14 @@ public class Ingredient {
 		pcs.firePropertyChange("isRecipe", oldIsRecipe, isRecipe);
 	}
 
+
+	public int getIngredientType() {
+		return ingredientType;
+	}
+
+	public void setIngredientType(int ingredientType) {
+		this.ingredientType = ingredientType;
+	}
 
 	public void addProertyChangeListener(PropertyChangeListener l) {
 		pcs.addPropertyChangeListener(l);

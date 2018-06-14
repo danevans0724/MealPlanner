@@ -13,7 +13,7 @@ import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.dataconnector.internal.dbms.SQLSrvConnection;
 import org.evansnet.ingredient.model.Ingredient;
-import org.evansnet.ingredient.persistence.repository.IngredientRepository;
+import org.evansnet.ingredient.persistence.repository.IRepository;
 import org.evansnet.ingredient.persistence.repository.RepositoryBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -23,7 +23,7 @@ public class TestRepository {
 	
 	private IDatabase db;
 	private Credentials credentials;
-	private IngredientRepository repo;
+	private IRepository repo;
 	Ingredient i;
 	Map<Integer, Ingredient> map1 = new HashMap<Integer, Ingredient>();
 
@@ -91,10 +91,10 @@ public class TestRepository {
 	public void testDoFetchAll() {
 		//Test executing a select statement from the IngredientRepository class.
 		try {
-			Map<Integer, Ingredient> ingredients = repo.fetchAll();
+			Map<Integer, Object> ingredients = repo.fetchAll();
 			assertNotNull(ingredients);
 			for (Integer i : ingredients.keySet()) {
-				Ingredient theIng = ingredients.get(i);
+				Ingredient theIng = (Ingredient)ingredients.get(i);
 				System.out.println(theIng.getID() + " " + theIng.getIngredientName());
 			}
 		} catch (Exception e) {
@@ -107,7 +107,7 @@ public class TestRepository {
 	public void testFetchID() {
 		Ingredient i = new Ingredient();
 		try {
-			i = repo.fetchById(1);
+			i = (Ingredient) repo.fetchById(1);
 			assertNotNull(i);
 			assertEquals("All Purpose Flour", i.getIngredientName());
 			System.out.println(i.getID() + ", " + i.getIngredientName());
@@ -119,12 +119,12 @@ public class TestRepository {
 	@Test
 	public void testFetchName() {
 		String nameToFetch = "All Purpose Flour";
-		List<Ingredient> returned = new ArrayList<Ingredient>();
+		List<Object> returned = new ArrayList<Object>();
 		try {
 			returned = repo.fetchByName(nameToFetch);
-			assertEquals(nameToFetch, returned.get(0).getIngredientName());
+			assertEquals(nameToFetch, ((Ingredient)returned.get(0)).getIngredientName());
 			assertEquals(returned.size(), 1);
-			System.out.println(returned.get(0).getID() + ", " + returned.get(0).getIngredientName());
+			System.out.println(((Ingredient)returned.get(0)).getID() + ", " + ((Ingredient)returned.get(0)).getIngredientName());
 		} catch(Exception e) {
 			fail("Exception thrown on fetchName()! " + e.getMessage());
 		}

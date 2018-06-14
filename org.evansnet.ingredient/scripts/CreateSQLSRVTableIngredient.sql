@@ -10,6 +10,27 @@ CREATE TABLE DBO.INGREDIENT (
 	PKG_UOM BIGINT NULL,
 	UNIT_PRICE DECIMAL(6,2) NULL,
 	PKG_PRICE DECIMAL (6,2) NULL,
-	IS_RECIPE BIT DEFAULT 0);
+	IS_RECIPE BIT DEFAULT 0),
+	ING_TYPE BIGINT;
 
 --SELECT COUNT(*) FROM DBO.INGREDIENT;
+
+-- Alter the table to add the VERSION and the ING_TYPE columns.
+ALTER TABLE DBO.INGREDIENT 
+   ADD ING_TYPE BIGINT;
+
+-- Ingredient types describe a family of ingredients like staples, canned goods etc.       
+CREATE TABLE DBO.INGREDIENT_TYPE (
+	ID BIGINT PRIMARY KEY,
+	ING_TYPE_NAME VARCHAR(40),
+	TYPE_DESCR VARCHAR(80));
+
+-- Set ingredient type as a foreign key in the ingredient table.	
+ALTER TABLE DBO.INGREDIENT 
+	ADD CONSTRAINT fk_IngType_id_ingredient 
+	    FOREIGN KEY(ING_TYPE) 
+	    REFERENCES DBO.INGREDIENT_TYPE(ID); 
+
+	
+	
+	

@@ -11,7 +11,6 @@ import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.dataconnector.ui.ConnectionDialog;
-import org.evansnet.ingredient.persistence.PersistenceProvider;
 
 /**
  * A class that allows for the creation of a repository in a database and 
@@ -38,7 +37,7 @@ public class RepositoryBuilder {
 	private String 		sqlCreate;		//Create table statement
 	private String 		connStr;		//The connection string provided by the data connector.
 	private Connection 	conn;			//The database connection provided by the data connector.
-	private IngredientRepository repo;	//The newly created ingredient repository.
+	private IRepository repo;	//The newly created ingredient repository.
 	private ConnectionDialog connectionDialog;
 
 	
@@ -67,7 +66,7 @@ public class RepositoryBuilder {
 	 * @return An Ingredient repository object
 	 * @throws ClassNotFoundException 
 	 */	
-	public IngredientRepository createRepository() throws SQLException, ClassNotFoundException {
+	public IRepository createRepository() throws SQLException, ClassNotFoundException {
 		RepositoryHelper rhlp = new RepositoryHelper(database);
 		if (connStr == null) {
 			conn = buildConnection();
@@ -98,7 +97,7 @@ public class RepositoryBuilder {
 		return repo;
 	}
 	
-	public IngredientRepository createRepository(String strConn) throws SQLException, ClassNotFoundException {
+	public IRepository createRepository(String strConn) throws SQLException, ClassNotFoundException {
 		connStr = strConn;
 		repo = createRepository();
 		return repo;
