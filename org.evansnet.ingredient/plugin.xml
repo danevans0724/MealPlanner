@@ -81,6 +81,13 @@
                   mnemonic="&amp;s"
                   style="push">
             </command>
+            <command
+                  commandId="org.evansnet.ingredient.command.ingredient.delete"
+                  id="org.evansnet.ingredient.ui.main.menu.delete"
+                  label="Delete"
+                  mnemonic="&amp;d"
+                  style="push">
+            </command>
          </menu>
          <menu
                label="Window">
@@ -120,7 +127,6 @@
       </command>
       <command
             categoryId="org.evansnet.ingredient.category"
-            defaultHandler="org.evansnet.ingredient.handlers.IngredientSaveHandler"
             description="Save the ingredient"
             id="org.evansnet.ingredient.command.ingredient.save"
             name="Save">
@@ -130,6 +136,12 @@
             description="Change an ingredient"
             id="org.evansnet.ingredient.command.ingredient.edit"
             name="Edit Ingredient">
+      </command>
+      <command
+            categoryId="org.evansnet.ingredient.category"
+            description="Removes an ingredient from the repository"
+            id="org.evansnet.ingredient.command.ingredient.delete"
+            name="Delete">
       </command>
    </extension>
    <extension
@@ -155,6 +167,10 @@
       <handler
             class="org.evansnet.ingredient.handlers.IngredientEditHandler"
             commandId="org.evansnet.ingredient.command.ingredient.edit">
+      </handler>
+      <handler
+            class="org.evansnet.ingredient.handlers.IngredientDeleteHandler"
+            commandId="org.evansnet.ingredient.command.ingredient.delete">
       </handler>
    </extension>
    <extension

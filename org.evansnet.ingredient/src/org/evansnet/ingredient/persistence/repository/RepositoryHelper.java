@@ -144,10 +144,8 @@ public class RepositoryHelper {
 		DBType type = null; 
 		if (c.contains("jdbc:mysql")) {					//Based on MySQL connector driver.
 			type = DBType.MySQL;
-//			database = new SQLSrvConnection();
 		} else if (c.contains("jdbc:sqlserver")) {		//Based on Microsoft driver.
 			type = DBType.MS_SQLSrv;
-//			database = new MySQLConnection();
 		}
 		return type;
 	}
@@ -198,8 +196,8 @@ public class RepositoryHelper {
 						continue;
 					} else {
 						start = start + 9;
+						//TODO: Need to call Credentials class to unencrypt password.
 						database.getCredentials().setPassword(s.substring(start, end));
-//						javaLogger.log(Level.INFO, "Setting password " + s.substring(start, end));
 						continue;
 					}
 				} else {

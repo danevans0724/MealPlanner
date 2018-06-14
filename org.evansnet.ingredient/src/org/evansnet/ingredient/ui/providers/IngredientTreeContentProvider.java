@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.evansnet.ingredient.model.Ingredient;
+import org.evansnet.ingredient.persistence.repository.IRepository;
 import org.evansnet.ingredient.persistence.repository.IngredientRepository;
 
 public class IngredientTreeContentProvider implements ITreeContentProvider {
@@ -23,7 +24,7 @@ public class IngredientTreeContentProvider implements ITreeContentProvider {
 		
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof IngredientRepository) {
+		if (inputElement instanceof IRepository) {
 			repo = ((IngredientRepository)inputElement);
 			Object[] ingList = new Object[] {"Ingredients"};
 			return ingList;
@@ -33,7 +34,7 @@ public class IngredientTreeContentProvider implements ITreeContentProvider {
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof IngredientRepository) {
+		if (parentElement instanceof IRepository) {
 			return getChildren("Ingredients");
 		} else if (parentElement instanceof Object[]) {
 			return (Object[])parentElement;
@@ -55,7 +56,7 @@ public class IngredientTreeContentProvider implements ITreeContentProvider {
 	
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof IngredientRepository) {
+		if (element instanceof IRepository) {
 			return true;
 		} else if (element instanceof String && ((String)element)== "Ingredients") { 
 			// The repository hash map has an entry set of ID's and ingredients
@@ -66,14 +67,15 @@ public class IngredientTreeContentProvider implements ITreeContentProvider {
 
 	public Object[] fetchNames(IngredientRepository r) {
 		javaLogger.log(Level.INFO, "Fetching ingredients from the repository");
-		HashMap<Integer, Ingredient> repoIngredients = r.getTreeIngredients();
+		HashMap<Integer, Object> repoIngredients = r.getTreeIngredients();
 		Object[] names = new Object[repoIngredients.size()];
 		int count = 0;
-		for (Map.Entry<Integer, Ingredient> i : repoIngredients.entrySet()) {
+		for (Map.Entry<Integer, Object> i : repoIngredients.entrySet()) {
 			String n = ((Ingredient)i.getValue()).getIngredientName();
 			names[count] = (Object) n;
 			++count;
 		}
+		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "fetchNames()", "Fetched " + count + " ingredients from the repository.");
 		return names;
 	}
 
@@ -81,6 +83,14 @@ public class IngredientTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		// TODO Auto-generated method stub		
+	}
+
+	public IngredientRepository getRepo() {
+		return repo;
+	}
+
+	public void setRepo(IngredientRepository repo) {
+		this.repo = repo;
 	}
 
 }

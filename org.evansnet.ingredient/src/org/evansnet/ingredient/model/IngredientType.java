@@ -11,7 +11,6 @@ package org.evansnet.ingredient.model;
  */
 public class IngredientType {
 	
-	public static int lastID;	//TODO: How do we keep track of the last ID from run to run?
 	int typeID;
 	String typeName;
 	String typeDesc;
@@ -57,11 +56,6 @@ public class IngredientType {
 	
 	// Methods
 	
-	private int generateID() {
-		//TODO: implement the method to generate a unique ingredient ID. 
-		return -1;
-	}
-
 	/**
 	 * After check of the id by an ingredient type list, warns the user
 	 * that the ID is already in use or is not an integer value.

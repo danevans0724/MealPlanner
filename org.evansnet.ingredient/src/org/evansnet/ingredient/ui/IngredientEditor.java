@@ -10,11 +10,15 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.EditorPart;
 import org.evansnet.ingredient.model.Ingredient;
+import org.evansnet.ingredient.persistence.IPersistenceProvider;
 import org.evansnet.ingredient.persistence.IngredientPersistenceAction;
-import org.evansnet.ingredient.persistence.PersistenceProvider;
+import org.evansnet.ingredient.persistence.IngredientProvider;
 
 
 /**
@@ -43,14 +47,15 @@ public class IngredientEditor extends EditorPart {
 	
 	@Override
 	public void doSave(IProgressMonitor monitor)  {
-		PersistenceProvider provider;
+		IPersistenceProvider provider;
 		try {
-			provider = new PersistenceProvider( ingEditorComposite.getIngredient(),
+			provider = new IngredientProvider( ingEditorComposite.getIngredient(),
 					IngredientPersistenceAction.Ingredient_Save);
-			provider.doSave();
-			//TODO: Add new ingredient to the tree list: IngredientExplorerView
-			// since we have a repository, we should be able to fire an event to update the tree.
-			makeDirty(false);
+			int id = provider.doSave(ingredient);
+			ingredient.setID(id);
+			IngredientExplorerView explorerView = getIngredientExplorerView();
+			explorerView.addRepoItem(ingredient);
+		makeDirty(false);
 		} catch (SQLException  e) {
 			javaLogger.log(Level.SEVERE, "An SQL Exception occurred while trying to save an ingredient. \n " +
 				e.getErrorCode() + " " + e.getMessage() );
@@ -65,6 +70,24 @@ public class IngredientEditor extends EditorPart {
 	@Override
 	public void doSaveAs() {
 		// Do nothing for now.
+	}
+	
+	public void doDelete() {
+		IPersistenceProvider provider;
+		try {
+			provider = new IngredientProvider(ingEditorComposite.getIngredient(), 
+					IngredientPersistenceAction.Ingredient_Delete);
+			int id = provider.doDelete(ingredient);
+			ingredient.setID(id);      //This is necessary because if a user deletes a new ingredient from the editor it will have an id=0;
+			//Refresh the tree view to remove the deleted ingredient.
+			IngredientExplorerView explorerView = getIngredientExplorerView();
+			explorerView.removeRepoItem(ingredient.getID());		//Remove the item from the mappend list of ingredients
+			explorerView.getRepo().removeMappedItem(ingredient.getID());	//Remove the item from the tree.
+			makeDirty(false);
+		} catch (Exception e) {
+			javaLogger.logp(Level.SEVERE, ID, "doDelete()", "An Exception occurred while trying to delete an ingredient. \n" +
+		       e.getMessage());
+		}
 	}
 
 	@Override
@@ -106,5 +129,19 @@ public class IngredientEditor extends EditorPart {
 	public void setFocus() {
 		ingEditorComposite.setFocus();
 	}
+
+	public IngredientCompositeBase getIngEditorComposite() {
+		return ingEditorComposite;
+	}
+
+	public void setIngEditorComposite(IngredientCompositeBase ingEditorComposite) {
+		this.ingEditorComposite = ingEditorComposite;
+	}
 	
+	private IngredientExplorerView getIngredientExplorerView() {
+		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		IViewReference viewReference = page.findViewReference("org.evansnet.ingredient.ui.ingredientexplorerview");
+		IngredientExplorerView explorerView = (IngredientExplorerView) (viewReference.getView(true));
+		return explorerView;
+	}
 }

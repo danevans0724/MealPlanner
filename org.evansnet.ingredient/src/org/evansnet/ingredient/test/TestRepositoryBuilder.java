@@ -3,6 +3,7 @@ package org.evansnet.ingredient.test;
 import static org.junit.Assert.*;
 
 import org.evansnet.dataconnector.internal.core.DBType;
+import org.evansnet.ingredient.persistence.repository.IRepository;
 import org.evansnet.ingredient.persistence.repository.IngredientRepository;
 import org.evansnet.ingredient.persistence.repository.RepositoryBuilder;
 import org.junit.After;
@@ -15,7 +16,7 @@ public class TestRepositoryBuilder {
 	String conn2 = "jdbc:mysql://localhost:3306/INGREDIENT";	//MySQL test
 	DBType typeSQLSrv = DBType.MS_SQLSrv;
 	DBType typeMySql  = DBType.MySQL;
-	IngredientRepository repo;
+	IRepository repo;
 	RepositoryBuilder builder;
 	
 	//TODO: Refer to compuware tests to see how to make a mock DBMS instance.

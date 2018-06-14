@@ -5,8 +5,6 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.evansnet.ingredient.model.Ingredient;
 
-import org.evansnet.ingredient.model.Ingredient;
-
 /**
  * This input object connects the editorPart with the Ingredient model.
  * 
