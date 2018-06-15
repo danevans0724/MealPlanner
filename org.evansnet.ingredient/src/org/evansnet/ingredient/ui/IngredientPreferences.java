@@ -1,5 +1,9 @@
 package org.evansnet.ingredient.ui;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -11,8 +15,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
+import org.evansnet.ingredient.persistence.repository.IRepository;
+import org.evansnet.ingredient.persistence.repository.IngredientRepository;
+import org.evansnet.ingredient.persistence.repository.RepositoryHelper;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.GridData;
@@ -90,7 +98,13 @@ public class IngredientPreferences extends PreferencePage implements IWorkbenchP
 					MessageBox errBox = new MessageBox(parent.getShell(), SWT.ICON_ERROR);
 					errBox.setMessage(msg);
 					errBox.open();
-				} 
+				} else {
+					//Successful connection
+					String msg = "Connection successful!";
+					MessageBox success = new MessageBox(parent.getShell(), SWT.ICON_INFORMATION);
+					success.setMessage(msg);
+					success.open();
+				}
 				return;
 			}
 
@@ -158,10 +172,27 @@ public class IngredientPreferences extends PreferencePage implements IWorkbenchP
 	}
 
 	private boolean doTestRepositoryConn() {
-		// TODO: Temporary use of Java JDBC. Set up to use dataconnector plugin for long term
-		MessageBox info = new MessageBox(this.getShell(), SWT.ICON_INFORMATION);
-		info.setMessage("Not yet implemented. Always returns false!");
-		info.open();
-		return false;
+		MessageBox info; 
+//		info.setMessage("Not yet implemented. Always returns false!");
+//		info.open();
+		boolean result = false;
+		RepositoryHelper helper = new RepositoryHelper();
+		String message = "Failed to connect to the repository shown.";
+		info = new MessageBox(this.getShell(), SWT.ICON_INFORMATION);
+		try {
+			IDatabase dbTest = helper.getDefaultRepository();
+			if (dbTest == null) {
+				throw new Exception(message);
+			}
+			info.setMessage("Connection successful!");
+			info.open();
+			result = true;
+		} catch (Exception e) {
+			info.setMessage(message);
+			info.open();
+			e.printStackTrace();
+		}
+		
+		return result;
 	}
 }
