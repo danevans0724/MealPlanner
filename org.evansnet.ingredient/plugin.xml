@@ -112,6 +112,28 @@
             </command>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.evansnet.ingredient.ui.ingredientexplorerview">
+         <command
+               commandId="org.evansnet.ingredient.command.ingredient.delete"
+               label="Delete"
+               mnemonic="&amp;d"
+               style="push">
+         </command>
+         <command
+               commandId="org.evansnet.ingredient.command.ingredient.edit"
+               label="Edit"
+               mnemonic="&amp;e"
+               style="push">
+         </command>
+         <command
+               commandId="org.evansnet.ingredient.command.ingredient.tree.refresh"
+               label="Refresh"
+               mnemonic="&amp;r"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -135,13 +157,20 @@
             categoryId="org.evansnet.ingredient.category"
             description="Change an ingredient"
             id="org.evansnet.ingredient.command.ingredient.edit"
-            name="Edit Ingredient">
+            name="Edit">
       </command>
       <command
             categoryId="org.evansnet.ingredient.category"
             description="Removes an ingredient from the repository"
             id="org.evansnet.ingredient.command.ingredient.delete"
             name="Delete">
+      </command>
+      <command
+            categoryId="org.evansnet.ingredient.category"
+            defaultHandler="org.evansnet.ingredient.handlers.RefreshHandler"
+            description="Refresh the list in the tree"
+            id="org.evansnet.ingredient.command.ingredient.tree.refresh"
+            name="Refresh">
       </command>
    </extension>
    <extension
@@ -171,6 +200,10 @@
       <handler
             class="org.evansnet.ingredient.handlers.IngredientDeleteHandler"
             commandId="org.evansnet.ingredient.command.ingredient.delete">
+      </handler>
+      <handler
+            class="org.evansnet.ingredient.handlers.RefreshHandler"
+            commandId="org.evansnet.ingredient.command.ingredient.tree.refresh">
       </handler>
    </extension>
    <extension

@@ -83,5 +83,9 @@ public class IngredientInput implements IEditorInput {
 		return ingredient;
 	}
 
+	public void setIngredient(Ingredient i) {
+		ingredient = i;	
+	}
+
 
 }

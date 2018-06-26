@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.Credentials;
 import org.evansnet.dataconnector.internal.core.DBType;
@@ -51,6 +52,13 @@ public class RepositoryHelper {
 			IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
 			connStr = prefStore.getString(PreferenceConstants.PRE_REPO_CONN_STR);
 			if (connStr == "" || connStr == "Repository JDBC connection string") {
+				String message = "There is no repository defined. Open Windows then prefernces to define a default repository.";
+				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()", message);
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				MessageBox mb = new MessageBox(window.getShell(), SWT.ERROR);
+				mb.setText("Ingredient Repository Error! "); 
+				mb.setMessage(message);
+				mb.open();
 				return null; 
 			}
 			declareDbType(parseForDBMS(connStr), connStr);
