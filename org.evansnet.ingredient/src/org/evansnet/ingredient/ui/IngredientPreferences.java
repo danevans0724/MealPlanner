@@ -173,8 +173,6 @@ public class IngredientPreferences extends PreferencePage implements IWorkbenchP
 
 	private boolean doTestRepositoryConn() {
 		MessageBox info; 
-//		info.setMessage("Not yet implemented. Always returns false!");
-//		info.open();
 		boolean result = false;
 		RepositoryHelper helper = new RepositoryHelper();
 		String message = "Failed to connect to the repository shown.";

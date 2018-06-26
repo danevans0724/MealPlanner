@@ -6,12 +6,16 @@ import java.util.logging.Logger;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.handlers.HandlerUtil;
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.ui.IngredientEditor;
+import org.evansnet.ingredient.ui.IngredientExplorerView;
 import org.evansnet.ingredient.ui.IngredientInput;
 
 
@@ -30,29 +34,32 @@ public class IngredientEditHandler extends AbstractHandler {
 	
 	IngredientInput input;
 	
+	public IngredientEditHandler() {}
+	
 	public IngredientEditHandler(IngredientInput i) {
 		input = i;
 	}
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
+		IStructuredSelection treeSelection;
 		IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		IWorkbenchPage activePage = window.getActivePage();
-		//We have the window, now open and fill it.
+		IWorkbenchPart part = window.getActivePage().getActivePart();	//HandlerUtil.getActivePart(event);
+		
+		//We have the window, now open and fill the editor.
 		try {
-	 		if (!(input == null)) {
-				IEditorPart editor = activePage.getActiveEditor();
-				if (editor == null) {
-					Ingredient i = input.getIngredient();
-					editor = new IngredientEditor(i);	
+				if (part instanceof IngredientExplorerView) {
+					// The request has come from the tree. 
+					treeSelection = ((IngredientExplorerView) part).getTreeSelection();
+					String ingName = (String) treeSelection.getFirstElement();	//Gives the ingredient name.
+					Ingredient ingredient = (Ingredient) ((IngredientExplorerView) part).getRepo().fetchByName(ingName).get(0);
+					input.setIngredient(ingredient);
+				} else {
+					String message = "An unknown source was received for editing!";
+					javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "execute()", message);
+					throw new ExecutionException(message);
 				}
-				activePage.openEditor(input, IngredientEditor.ID);
-			} else {
-				String message = new String("ERROR! Input for the editor is empty!");
-				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "execute()", 
-						message);
-				throw new Exception(message);
-			}
+			window.getActivePage().openEditor(input, IngredientEditor.ID, true);
 		} catch (Exception e) { 
 			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "execute()", e.toString());
 		}

@@ -8,11 +8,13 @@ import java.util.logging.Logger;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.part.ViewPart;
@@ -58,6 +60,12 @@ public class IngredientExplorerView extends ViewPart {
 		treeviewer.setLabelProvider(new IngredientTreeLabelProvider());
 		treeviewer.setContentProvider(new IngredientTreeContentProvider());
 		treeviewer.setInput(repo);
+		
+		// Register a context menu for ingredient edit and delete from the tree viewer.
+		MenuManager menuMgr = new MenuManager();
+		Menu popupMnu = menuMgr.createContextMenu(treeviewer.getTree());
+		treeviewer.getTree().setMenu(popupMnu);
+		getSite().registerContextMenu(menuMgr, treeviewer);
 
 		/**
 		 * This listener allows for the selection of an ingredient and its display in 
@@ -140,5 +148,9 @@ public class IngredientExplorerView extends ViewPart {
 		Map<Integer, Object> dummy = repo.fetchAll();	// Update the repository. The variable is a dummy. We just want to refresh the map.
 		dummy = null;
 		refresh(true);
+	}
+	
+	public IStructuredSelection getTreeSelection() {
+		return treeviewer.getStructuredSelection();
 	}
 }
