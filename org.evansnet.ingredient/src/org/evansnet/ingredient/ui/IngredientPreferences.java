@@ -1,9 +1,5 @@
 package org.evansnet.ingredient.ui;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
@@ -18,8 +14,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
-import org.evansnet.ingredient.persistence.repository.IRepository;
-import org.evansnet.ingredient.persistence.repository.IngredientRepository;
 import org.evansnet.ingredient.persistence.repository.RepositoryHelper;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridLayout;

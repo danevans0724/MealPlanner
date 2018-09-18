@@ -12,7 +12,7 @@ import org.junit.Test;
 
 public class TestRepositoryBuilder {
 	
-	String conn1 = "jdbc:sqlserver://localhost:1433;database=DCEDB01;user=devans;password=3xnhlcup";	//SQL Server test
+	String conn1 = "jdbc:sqlserver://localhost:1433;database=DCEDB01;user=Dan;password=3xnhlcup";	//SQL Server test
 	String conn2 = "jdbc:mysql://localhost:3306/INGREDIENT";	//MySQL test
 	DBType typeSQLSrv = DBType.MS_SQLSrv;
 	DBType typeMySql  = DBType.MySQL;

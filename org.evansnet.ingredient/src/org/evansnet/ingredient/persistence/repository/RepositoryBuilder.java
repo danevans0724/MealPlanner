@@ -64,9 +64,9 @@ public class RepositoryBuilder {
 	 * host, and DBMS in which to build the table.
 	 * 
 	 * @return An Ingredient repository object
-	 * @throws ClassNotFoundException 
+	 * @throws Exception 
 	 */	
-	public IRepository createRepository() throws SQLException, ClassNotFoundException {
+	public IRepository createRepository() throws Exception {
 		RepositoryHelper rhlp = new RepositoryHelper(database);
 		if (connStr == null) {
 			conn = buildConnection();
@@ -97,7 +97,7 @@ public class RepositoryBuilder {
 		return repo;
 	}
 	
-	public IRepository createRepository(String strConn) throws SQLException, ClassNotFoundException {
+	public IRepository createRepository(String strConn) throws Exception {
 		connStr = strConn;
 		repo = createRepository();
 		return repo;
@@ -151,7 +151,7 @@ public class RepositoryBuilder {
 			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Created create table DDL \n" + sb.toString());
 			
 			if (conn == null || conn.isClosed()) {		
-				if (database.getCredentials().getUserID().isEmpty()) {
+				if (database.getCredentials().getUserID().length == 0) {
 					javaLogger.log(Level.SEVERE, "No credentials are available!", class_name);
 					throw new SQLException("No credentials available for repository build.");
 					//TODO: Get credentials for the connection if not already defined.

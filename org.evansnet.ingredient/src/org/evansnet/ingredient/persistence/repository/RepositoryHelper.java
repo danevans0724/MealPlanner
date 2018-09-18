@@ -1,5 +1,9 @@
 package org.evansnet.ingredient.persistence.repository;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -62,8 +66,8 @@ public class RepositoryHelper {
 				return null; 
 			}
 			declareDbType(parseForDBMS(connStr), connStr);
-			database.getCredentials().setUserID(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID));
-			database.getCredentials().setPassword(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD));
+			database.getCredentials().setUserID(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID).toCharArray());
+			database.getCredentials().setPassword(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD).toCharArray());
 		} catch (ClassNotFoundException | SQLException e) {
 			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()",
 					"An exception occurred while attempting to get the default repository info from the preference store " + 
@@ -79,12 +83,20 @@ public class RepositoryHelper {
 		//TODO: This is a temporary hack to append the user ID and password to the connection string.
 		//      To fix this, refactor this to use the dataconnector connection string factory.
 		String connHack = database.getConnectionString();
-		connHack = connHack + ";user=" + database.getCredentials().getUserID();
-		connHack = connHack + ";password=" + database.getCredentials().getPassword();
+		connHack = connHack + ";user=" + new String(database.getCredentials().getUserID());
+		connHack = connHack + ";password=" + new String(database.getCredentials().getPassword(fetchCert()));
 		database.setConnectionString(connHack);
 		return database;
 	}
 	
+	private Certificate fetchCert() throws Exception {
+		// TODO Refactor this into the common security plugin.
+		String certFile = "C:\\Users\\pmidce0\\git\\dataconnector\\org.evansnet.dataconnector\\security\\credentials.cer";
+		FileInputStream fis = new FileInputStream(certFile);
+		Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(fis);	
+		return cert;
+	}
+
 	/**
 	 * Used when the builder is supplied a connection string. After the string is parsed,
 	 * and the type of DBMS is determined, then the database is constructed based on the 
@@ -187,7 +199,7 @@ public class RepositoryHelper {
 			return false;
 		}
 		if (database.getCredentials() == null) {
-			database.setCredentials(new Credentials(new String(), new String()));
+			database.setCredentials(new Credentials());
 		}
 		ArrayList<String> cStr = new ArrayList<String>();
 		cStr.add("user");
@@ -199,13 +211,12 @@ public class RepositoryHelper {
 					int end = s.indexOf(";", start) > 0 ? s.indexOf(";", start) : s.length();
 					if (c.equals("user")) {
 						start = start + 5;
-						database.getCredentials().setUserID(s.substring(start, end));
+						database.getCredentials().setUserID(s.substring(start, end).toCharArray());
 						javaLogger.log(Level.INFO, "Setting user ID " + s.substring(start, end));
 						continue;
 					} else {
 						start = start + 9;
-						//TODO: Need to call Credentials class to unencrypt password.
-						database.getCredentials().setPassword(s.substring(start, end));
+						database.getCredentials().setPassword(s.substring(start, end).toCharArray());
 						continue;
 					}
 				} else {

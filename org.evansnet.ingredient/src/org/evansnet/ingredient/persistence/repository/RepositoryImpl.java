@@ -210,7 +210,7 @@ public class RepositoryImpl implements IRepository {
 	 * @return The number of ingredients in the table + 1
 	 * @throws SQLException 
 	 */
-	protected int getNextID() throws SQLException {
+	protected int getNextID() throws Exception {
 		int lastID = 0;
 		Connection conn = connect();		
 		try {
@@ -232,7 +232,7 @@ public class RepositoryImpl implements IRepository {
 		return ++lastID;
 	}
 
-	protected Connection connect() throws SQLException {
+	protected Connection connect() throws Exception {
 			Connection conn = repo.getConnection();
 			if (conn == null || conn.isClosed()) {
 				try {

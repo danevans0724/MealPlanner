@@ -97,7 +97,7 @@ public class TestRepositoryHelper {
 	}
 	
 	@Test
-	public void testDeclareDB() {
+	public void testDeclareDB() throws Exception {
 		RepositoryHelper helper = new RepositoryHelper(database);
 		for (DBType t : connStrings.keySet()) {
 			database.setConnectionString(connStrings.get(t));

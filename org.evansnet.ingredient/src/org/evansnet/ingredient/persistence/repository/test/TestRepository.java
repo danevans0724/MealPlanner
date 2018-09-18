@@ -2,7 +2,10 @@ package org.evansnet.ingredient.persistence.repository.test;
 
 import static org.junit.Assert.*;
 
+import java.io.FileInputStream;
 import java.math.BigDecimal;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,13 +36,15 @@ public class TestRepository {
 		db = new SQLSrvConnection();
 		db.getHost().setHostName("localhost");
 		db.getHost().setPort(1433);
-		credentials = new Credentials("devans", "3xnhlcup");
+		credentials = new Credentials();
+		credentials.setUserID("Dan".toCharArray());
+		credentials.setPassword("3xnhlcup".toCharArray());
 		db.setInstanceName(db.getHost().getHostName());
 		db.setDatabaseName("DCEDB01");
 		db.setCredentials(credentials);
 		db.setSchema("dbo");
 		db.addParms("user", credentials.getUserID());
-		db.addParms("password", credentials.getPassword());
+		db.addParms("password", credentials.getPassword(fetchCert()));
 		db.buildConnectionString(DBType.MS_SQLSrv);
 
 		// Build the repository table.
@@ -56,6 +61,14 @@ public class TestRepository {
 		i.setPkgUom("1");
 		i.setStrUom("1");
 		i.setIsRecipe(false);
+	}
+
+	private Certificate fetchCert() throws Exception {
+		// TODO Refactor this into the common security plugin
+		String certFile = "C:\\Users\\pmidce0\\git\\dataconnector\\org.evansnet.dataconnector\\security\\credentials.cer";
+		FileInputStream fis = new FileInputStream(certFile);
+		Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(fis);
+		return cert;
 	}
 
 	@After
