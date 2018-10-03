@@ -1,7 +1,6 @@
 package org.evansnet.ingredient.persistence.repository;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.sql.SQLException;
