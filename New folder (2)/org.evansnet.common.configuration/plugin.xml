@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.4"?>
-<plugin>
-   <extension-point id="org.evansnet.common.configuration" name="org.evansnet.common.configuration.config" schema="schema/org.evansnet.common.configuration.exsd"/>
-
-</plugin>
