@@ -54,7 +54,7 @@ public class TestRepositoryHelper {
 	}
 
 	@Test
-	public void testCredentialExtractTest() {
+	public void testCredentialExtractTest() throws Exception {
 		RepositoryHelper helper = new RepositoryHelper(database);
 		for (String s : credentialTestStrings) {
 			boolean strOk = false;

@@ -103,10 +103,9 @@ public class RepositoryHelper {
 	 * DBMS types supported by the org.evansnet.dataconnector plug-in.
 	 * 
 	 * @param dbType
-	 * @throws ClassNotFoundException
-	 * @throws SQLException
+	 * @throws Exception 
 	 */
-	public IDatabase declareDbType(DBType dbType, String c) throws ClassNotFoundException, SQLException {
+	public IDatabase declareDbType(DBType dbType, String c) throws Exception {
 		int h, endDB;
 		String connStr = c;
 		switch(dbType) {
@@ -193,8 +192,9 @@ public class RepositoryHelper {
 	 * into this object's credential object and then into the database object's
 	 * credentials object.
 	 * @param s
+	 * @throws Exception 
 	 */
-	public boolean extractCredentials(String s) {
+	public boolean extractCredentials(String s) throws Exception {
 		if (database == null) {
 			return false;
 		}
