@@ -49,6 +49,7 @@ public class RepositoryImpl implements IRepository {
 			if (repo == null) {
 				message = "The repository is null. Has the default been established?";
 			}
+			javaLogger.log(Level.SEVERE,"The repository is null. Has the default been established? \n");
 			e.printStackTrace();
 			throw new Exception("fetchDefaultRepo() failed! \n" + message);
 		}
