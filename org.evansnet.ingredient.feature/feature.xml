@@ -11,7 +11,7 @@
    </description>
 
    <copyright url="http://www.example.com/copyright">
-      © Copyright Daniel C. Evans All rights reserved. 2017
+      © Copyright Daniel C. Evans All rights reserved. 2017 - 2019
    </copyright>
 
    <license url="http://www.example.com/license">
@@ -52,6 +52,10 @@
 
    <plugin
          id="org.evansnet.common"
+         os="win32"
+         ws="win32"
+         nl="en_US"
+         arch="x86_64"
          download-size="0"
          install-size="0"
          version="0.0.0"
