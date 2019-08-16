@@ -1,12 +1,16 @@
 package org.evansnet.ingredient.persistence.repository;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import java.security.cert.CertificateException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.SWT;
@@ -16,7 +20,9 @@ import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.Credentials;
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
+import org.evansnet.dataconnector.internal.dbms.MySQLConnection;
 import org.evansnet.dataconnector.internal.dbms.SQLSrvConnection;
+import org.evansnet.dataconnector.ui.ConnectionDialog;
 import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
 
@@ -27,14 +33,14 @@ import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
  */
 public class RepositoryHelper {
 	
-	public static String THIS_CLASS_NAME = "org.evansnet.ingredient.persistence.repository.RepositoryHelper";
+	public static final String THIS_CLASS_NAME = RepositoryHelper.class.getName();
 	Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
 	
 	private IDatabase database;
 	String connStr;
 	
 	public RepositoryHelper() {
-		connStr = new String();		
+		connStr = "";		
 	}
 
 	public RepositoryHelper(IDatabase db) {
@@ -50,13 +56,14 @@ public class RepositoryHelper {
 	 * @return An IDatabase object that contains the information needed to operate the repository
 	 *            or null if the default repository is not yet defined.
 	 */
-	public IDatabase getDefaultRepository() throws Exception {	
+	public IDatabase getDefaultRepository() throws Exception {
+		String thisMethodName = "getDefaultRepository()";
 		try {
 			IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
 			connStr = prefStore.getString(PreferenceConstants.PRE_REPO_CONN_STR);
-			if (connStr == "" || connStr == "Repository JDBC connection string") {
+			if (connStr.isEmpty() || connStr.equals("Repository JDBC connection string")) {
 				String message = "There is no repository defined. Open Windows then prefernces to define a default repository.";
-				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()", message);
+				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, thisMethodName, message);
 				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				MessageBox mb = new MessageBox(window.getShell(), SWT.ERROR);
 				mb.setText("Ingredient Repository Error! "); 
@@ -68,12 +75,11 @@ public class RepositoryHelper {
 			database.getCredentials().setUserID(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID).toCharArray());
 			database.getCredentials().setPassword(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD).toCharArray());
 		} catch (ClassNotFoundException | SQLException e) {
-			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()",
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, thisMethodName,
 					"An exception occurred while attempting to get the default repository info from the preference store " + 
 			         e.getMessage());
-			e.printStackTrace();
 		} catch (Exception e) {
-			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getDefaultRepository()", 
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, thisMethodName, 
 					"An unidentifed exception occurred while retrieving the default ingredient repo" 
 					+ e.getMessage());
 			throw new Exception("getDefaultRepository failed. " + e.getMessage());
@@ -88,12 +94,11 @@ public class RepositoryHelper {
 		return database;
 	}
 	
-	private Certificate fetchCert() throws Exception {
+	private Certificate fetchCert() throws FileNotFoundException, CertificateException {
 		// TODO Refactor this into the common security plugin.
 		String certFile = "C:\\Users\\pmidce0\\git\\dataconnector\\org.evansnet.dataconnector\\security\\credentials.cer";
 		FileInputStream fis = new FileInputStream(certFile);
-		Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(fis);	
-		return cert;
+		return CertificateFactory.getInstance("X.509").generateCertificate(fis);
 	}
 
 	/**
@@ -105,44 +110,46 @@ public class RepositoryHelper {
 	 * @throws Exception 
 	 */
 	public IDatabase declareDbType(DBType dbType, String c) throws Exception {
-		int h, endDB;
-		String connStr = c;
+		int h;
+		int endDB;
+		String connectStr = c;
 		switch(dbType) {
 		case MS_SQLSrv :
-			database = new SQLSrvConnection();
+			IDatabase sqldb = new SQLSrvConnection();
 			//TODO: Update parser to handle inclusion of an instance name.
 			//We know the format of the connection string so set the host based on the connection string content
-			h = connStr.indexOf("://") + 3;
-			endDB = connStr.indexOf(":", h);
-			database.getHost().setHostName(connStr.substring(h, endDB));
-			h = connStr.indexOf("database=") + 9;						// Find the database name.
-			endDB = connStr.indexOf(";", h); 
+			//jdbc:sqlserver://host:portNumber;database=theDatabase;property=value;property=value
+			h = connectStr.indexOf("://") + 3;
+			endDB = connectStr.indexOf(':', h);
+			sqldb.getHost().setHostName(connectStr.substring(h, endDB));
+			h = connectStr.indexOf("database=") + 9;						// Find the database name.
+			endDB = connectStr.indexOf(';', h); 
 			if (endDB < 0) {
-				database.setDatabaseName(connStr.substring(h));
+				sqldb.setDatabaseName(connectStr.substring(h));
 			} else {
-				database.setDatabaseName(connStr.substring(h, endDB));
+				sqldb.setDatabaseName(connectStr.substring(h, endDB));
 			}
-			database.setConnectionString(connStr);
-			if (extractCredentials(connStr));
-			database.setSchema("dbo");     // Set default to dbo.
-			return database;
+			sqldb.setConnectionString(connectStr);
+			if (extractCredentials(connectStr));
+			sqldb.setSchema("dbo");     // Set default to dbo.
+			return sqldb;
 			
 		case MySQL :
 			//jdbc:mysql://<<Host>>:3306/<<database>>
-			h = connStr.indexOf("://") + 3;
-			database.getHost().setHostName(connStr.substring(h, connStr.indexOf(":", h)));
-			h = connStr.indexOf("/", h) + 1;						// Find the database name.
-			endDB = connStr.indexOf("?", h); 
+			IDatabase mydb = new MySQLConnection();
+			h = connectStr.indexOf("://") + 3;
+			mydb.getHost().setHostName(connectStr.substring(h, connectStr.indexOf(":", h)));
+			h = connectStr.indexOf('/', h) + 1;						// Find the database name.
+			endDB = connectStr.indexOf('?', h); 
 			if (endDB < 0) {
-				database.setDatabaseName(connStr.substring(h));
+				mydb.setDatabaseName(connectStr.substring(h));
 			} else {
-				database.setDatabaseName(connStr.substring(h, endDB));
+				mydb.setDatabaseName(connectStr.substring(h, endDB));
 			}
-			database.setConnectionString(connStr);
-			return database;
+			mydb.setConnectionString(connectStr);
+			return mydb;
 		default:
-			database = null;
-			return database;
+			return null;
 		}
 	}
 
@@ -158,7 +165,7 @@ public class RepositoryHelper {
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
 	 */
-	public DBType parseForDBMS(String c) throws ClassNotFoundException, SQLException {
+	public DBType parseForDBMS(String c) {
 		DBType type = null; 
 		if (c.contains("jdbc:mysql")) {					//Based on MySQL connector driver.
 			type = DBType.MySQL;
@@ -180,8 +187,7 @@ public class RepositoryHelper {
 			theMsg.setMessage(msg);
 			theMsg.open();
 		} catch (Exception e) {
-			javaLogger.log(Level.SEVERE, "Unable to get workbench: ", THIS_CLASS_NAME);
-			e.printStackTrace();
+			javaLogger.log(Level.SEVERE, "Unable to get workbench: " + e.getMessage(), THIS_CLASS_NAME);
 		}		
 	}
 	
@@ -200,18 +206,18 @@ public class RepositoryHelper {
 		if (database.getCredentials() == null) {
 			database.setCredentials(new Credentials());
 		}
-		ArrayList<String> cStr = new ArrayList<String>();
+		ArrayList<String> cStr = new ArrayList<>();
 		cStr.add("user");
 		cStr.add("password");
 		try {
 			for (String c : cStr) {
 				if (s.contains(c)) {
 					int start = s.indexOf(c);
-					int end = s.indexOf(";", start) > 0 ? s.indexOf(";", start) : s.length();
+					int end = s.indexOf(';', start) > 0 ? s.indexOf(';', start) : s.length();
 					if (c.equals("user")) {
 						start = start + 5;
 						database.getCredentials().setUserID(s.substring(start, end).toCharArray());
-						javaLogger.log(Level.INFO, "Setting user ID " + s.substring(start, end));
+						javaLogger.log(Level.INFO, "Setting user ID  %s", s.substring(start, end));
 						continue;
 					} else {
 						start = start + 9;
@@ -226,11 +232,34 @@ public class RepositoryHelper {
 			return false;
 		} catch(Exception e) {
 			javaLogger.log(Level.WARNING, "An exception occurred when trying to get credentials" 
-					+ " from the string provided. \n");
-			e.printStackTrace(); 
+					+ " from the string provided. \n" + e.getMessage());
 		}
 		return true;
 	}
 	
-
+	/**
+	 * Used to create a connection definition and to return the connection to the database. 
+	 * In the process, this method sets the IHost type, and connection string for the repository database.
+	 * 
+	 * @return A JDBC connection to the database. 
+	 */
+	public Connection buildConnection() {
+		Connection conn = null;
+		try {
+			ConnectionDialog connectionDialog = new ConnectionDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
+			database = (IDatabase)connectionDialog.open();
+			setConnectionString(database.getConnectionString());
+			conn = database.getConnection();
+		} catch (Exception e) {
+			String message = "An exception occurred while creating a connection to the repository";
+			javaLogger.logp(Level.SEVERE, RepositoryHelper.class.getName(), 
+					"buildConnection()", message + "\n" + e.getMessage());
+			conn = null;
+		}
+		return conn;
+	}
+	
+	public void setConnectionString(String s) {
+		connStr = s;
+	}
 }

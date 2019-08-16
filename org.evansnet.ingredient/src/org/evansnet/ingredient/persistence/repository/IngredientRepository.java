@@ -43,7 +43,7 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 				fetchAll();
 				return  contents;
 			} catch (Exception e) {
-				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getTreeIngredients()" ,
+				javaLogger.logp(Level.SEVERE, THISCLASSNAME, "getTreeIngredients()" ,
 						"An exception was thrown when retrieving ingredients from the repository " +
 						e.getMessage());
 				e.printStackTrace();
@@ -79,11 +79,11 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 
 	@Override
 	public List<Object> fetchByName(String n) {
-		List<Object> result = new ArrayList<Object>();
+		List<Object> result = new ArrayList<>();
 			try {
 				fetchAll();
 			} catch (Exception e) {
-				javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "fetchName()", 
+				javaLogger.logp(Level.INFO, THISCLASSNAME, "fetchName()", 
 						"Fetching " + getTableName() + " list from the repository.");
 			}
 		for (Object i : contents.values()) {
@@ -95,7 +95,7 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 	}
 	
 	@Override
-	public int doInsertNew(Object ing) throws Exception {
+	public int doInsertNew(Object ing) throws SQLException {
 		int rowsInserted = 0;
 		int id = getNextID();
 		Ingredient i = (Ingredient) ing;
@@ -123,24 +123,24 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 			}			
 		}
 		insert.append(", " + i.getIngredientType() + ")");
-		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
+		javaLogger.logp(Level.INFO, THISCLASSNAME, "doInsertNew()",
 				"Insert statement completed: \n" + insert.toString());
-		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
+		javaLogger.logp(Level.INFO, THISCLASSNAME, "doInsertNew()",
 				"Connecting to the repository database.");
 		Connection con = connect();
 		Statement stmt = con.createStatement();
 		try {
-			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
+			javaLogger.logp(Level.INFO, THISCLASSNAME, "doInsertNew()",
 					"Executing insert query");
 			rowsInserted = stmt.executeUpdate(insert.toString());
 			if (rowsInserted > 0) {
 				//The insert was successful so add the ingredient to the map.
 				contents.put(i.getID(), i);
-			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doInsertNew()",
+			javaLogger.logp(Level.INFO, THISCLASSNAME, "doInsertNew()",
 					"Inserted " + rowsInserted + " rows successfully.");
 			}
 		} catch (Exception e) {
-			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "doInsertNew()",
+			javaLogger.logp(Level.SEVERE, THISCLASSNAME, "doInsertNew()",
 					"Failed to insert ingredient record. Rows inserted:  " + rowsInserted +
 					"\n" + e.getMessage());
 			e.printStackTrace();
@@ -152,7 +152,7 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 	}
 
 	@Override
-	public int doUpdate(Object ing) throws SQLException, Exception {
+	public int doUpdate(Object ing) throws SQLException {
 		int rowsUpd;
 		Ingredient i = (Ingredient) ing;
 		StringBuilder update = new StringBuilder();
@@ -180,18 +180,18 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 		update.append(", ING_TYPE=" + i.getIngredientType());
 		update.append(" WHERE ID=" + i.getID());
 		
-		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()",
+		javaLogger.logp(Level.INFO, THISCLASSNAME, "doUpdate()",
 				"Update query constructed: \n" + update.toString());
 		
-		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()", "Connecting to repository table. ");
+		javaLogger.logp(Level.INFO, THISCLASSNAME, "doUpdate()", "Connecting to repository table. ");
 		Connection conn = connect();
 		Statement s = conn.createStatement();
-		javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()", 
+		javaLogger.logp(Level.INFO, THISCLASSNAME, "doUpdate()", 
 				"Executing update query.");
 		try {
 			rowsUpd = s.executeUpdate(update.toString());
 			contents.put(i.getID(), ing);	//Add the new item to the mapped list of repository items.
-			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doUpdate()", "Successfully updated record.");
+			javaLogger.logp(Level.INFO, THISCLASSNAME, "doUpdate()", "Successfully updated record.");
 			
 		} catch (Exception e) {
 			e.printStackTrace();

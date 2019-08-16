@@ -18,8 +18,8 @@ import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
 
 public class RepositoryImpl implements IRepository {
 
-	public static String THIS_CLASS_NAME = RepositoryImpl.class.getName();
-	public static Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
+	public static final String THISCLASSNAME = RepositoryImpl.class.getName();
+	public static final Logger javaLogger = Logger.getLogger(THISCLASSNAME);
 	protected String connStr;
 	IDatabase repo;
 	protected String repoName;
@@ -30,10 +30,8 @@ public class RepositoryImpl implements IRepository {
 	private   String tableName;
 
 	public RepositoryImpl() {
-		connStr = new String();
-		repoName = new String("");
 		isDefault = false;
-		contents = new HashMap<Integer, Object>();
+		contents = new HashMap<>();
 	}
 
 	@Override
@@ -45,12 +43,12 @@ public class RepositoryImpl implements IRepository {
 				//Null means no default is defined. Create a default repo.
 			}
 		} catch (Exception e) {
-			String message = new String(""); 
+			String message = ""; 
 			if (repo == null) {
 				message = "The repository is null. Has the default been established?";
 			}
-			javaLogger.log(Level.SEVERE,"The repository is null. Has the default been established? \n");
-			e.printStackTrace();
+			javaLogger.log(Level.SEVERE,"The repository is null. Has the default been established? \n" + 
+							e.getMessage());
 			throw new Exception("fetchDefaultRepo() failed! \n" + message);
 		}
 		isDefault = true;
@@ -119,39 +117,39 @@ public class RepositoryImpl implements IRepository {
 
 	@Override
 	public List<Object> fetchByName(String n) {
-		List<Object> result = new ArrayList<Object>();
-		return result;
+		return new ArrayList<>();
 	}
 
 	@Override
-	public int doInsertNew(Object ing) throws Exception {
+	public int doInsertNew(Object ing) throws SQLException {
 		return 0;
 	}
 
 	@Override
-	public int doUpdate(Object ing) throws SQLException, Exception {
+	public int doUpdate(Object ing) throws SQLException {
 		return 0;
 	}
 
 	@Override
-	public int doDelete(int i) throws SQLException, Exception {
+	public int doDelete(int i) throws SQLException {
 		int rowsDel = -1;
 		StringBuilder delete = new StringBuilder("DELETE FROM " + repo.getSchema() + "." +
 				tableName + " WHERE ID = " + i);
-		Connection conn = connect();
+		Connection conn = null;
 		try {
+			conn = connect();
 			Statement s = conn.createStatement();
 			rowsDel = s.executeUpdate(delete.toString());
 			contents.remove(i);		// Remove the object from the map.
-			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doDelete()", 
+			javaLogger.logp(Level.INFO, THISCLASSNAME, "doDelete()", 
 					"Successfully deleted ingredient with ID = " + i + " Rows deleted = " + rowsDel);
 			return i;
 		} catch (Exception e) {
-			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "doDelete()", 
+			javaLogger.logp(Level.SEVERE, THISCLASSNAME, "doDelete()", 
 					"An error occurred while deleting ingredient with ID " + i +
 					" \n" + e.getMessage());
 		} finally {
-			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "doDelete()", "Closing database connection.");
+			javaLogger.logp(Level.INFO, THISCLASSNAME, "doDelete()", "Closing database connection.");
 			conn.close();
 		}
 		return 0;
@@ -163,7 +161,7 @@ public class RepositoryImpl implements IRepository {
 		String s = "SELECT * FROM " + repo.getSchema() + "." + tableName + " WHERE ID=" + i;
 		Statement stmt = conn.createStatement();
 		try {
-			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "checkExist()", 
+			javaLogger.logp(Level.INFO, THISCLASSNAME, "checkExist()", 
 					"Checking for existence of " + tableName + " . Executing query.");
 			ResultSet rs = stmt.executeQuery(s);
 				if (rs.next()) {
@@ -171,7 +169,7 @@ public class RepositoryImpl implements IRepository {
 					return true;
 				}	
 		} catch (Exception e) {
-			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "checkExist()", 
+			javaLogger.logp(Level.SEVERE, THISCLASSNAME, "checkExist()", 
 					"An exception was thrown while checking for " + tableName + "  with ID = " + i +
 					"\n" + e.getMessage());
 			e.printStackTrace();
@@ -191,8 +189,7 @@ public class RepositoryImpl implements IRepository {
 		} catch (Exception e) {
 			String msg = "An error occured while storing the default repository " +
 					"connection. The error message is: " + e.getMessage();
-			javaLogger.log(Level.SEVERE, THIS_CLASS_NAME, msg);
-			e.printStackTrace();
+			javaLogger.log(Level.SEVERE, THISCLASSNAME, msg);
 		}
 	}
 
@@ -211,13 +208,14 @@ public class RepositoryImpl implements IRepository {
 	 * @return The number of ingredients in the table + 1
 	 * @throws SQLException 
 	 */
-	protected int getNextID() throws Exception {
+	protected int getNextID() throws SQLException {
 		int lastID = 0;
-		Connection conn = connect();		
+		Connection conn = connect();	
+		ResultSet rs;
 		try {
 			String query = "SELECT COUNT(ID) FROM " + repo.getSchema()+ "." + tableName + ";";
 			Statement sqlStatement = conn.createStatement();
-			ResultSet rs = sqlStatement.executeQuery(query);
+			rs = sqlStatement.executeQuery(query);
 			rs.next();
 			lastID = rs.getInt(1); 
 		} catch (SQLException e) {
@@ -225,7 +223,7 @@ public class RepositoryImpl implements IRepository {
 				       "Encountered an exception when accessing the database " + 
 						repo.getDatabaseName()+"." + repo.getDatabaseName() + "\n" + 
 			            e.getErrorCode() + " " + e.getMessage();
-			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, "getNextID()", message);
+			javaLogger.logp(Level.SEVERE, THISCLASSNAME, "getNextID()", message);
 			throw new SQLException(message);
 		} finally {
 			conn.close();
@@ -233,7 +231,7 @@ public class RepositoryImpl implements IRepository {
 		return ++lastID;
 	}
 
-	protected Connection connect() throws Exception {
+	protected Connection connect() throws SQLException {
 			Connection conn = repo.getConnection();
 			if (conn == null || conn.isClosed()) {
 				try {

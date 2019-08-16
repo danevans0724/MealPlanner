@@ -23,6 +23,8 @@ public class IngredientTypeRepository extends RepositoryImpl {
 
 	public static final String THIS_CLASS_NAME = IngredientTypeRepository.class.getName();
 	public Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
+	
+	IngredientType type;
 
 	public IngredientTypeRepository () {
 		super();
@@ -58,7 +60,7 @@ public class IngredientTypeRepository extends RepositoryImpl {
 
 	@Override
 	public List<Object> fetchByName(String n) {
-		List<Object> result = new ArrayList<Object>();
+		List<Object> result = new ArrayList<>();
 		if (contents.isEmpty()) {
 			try {
 				fetchAll();
@@ -68,7 +70,7 @@ public class IngredientTypeRepository extends RepositoryImpl {
 			}
 		} 
 		for (Object o : contents.values()) {
-			if (((IngredientType) o).getTypeName() == n) {
+			if (((IngredientType) o).getTypeName().equals(n)) {
 				result.add(o);
 			}
 		}
@@ -76,10 +78,9 @@ public class IngredientTypeRepository extends RepositoryImpl {
 	}
 
 	@Override
-	public int doInsertNew(Object ing) throws Exception {
+	public int doInsertNew(Object ing) throws SQLException {
 		int rowsInserted = -1;
 		StringBuilder query = new StringBuilder("INSERT INTO " + getTableName() + " VALUES (");
-		IngredientType type = new IngredientType();
 		type = (IngredientType)ing;
 		query.append(type.getTypeID() + ", ");
 		query.append("'" + type.getTypeName() + "', ");
@@ -94,9 +95,8 @@ public class IngredientTypeRepository extends RepositoryImpl {
 	}
 
 	@Override
-	public int doUpdate(Object ing) throws SQLException, Exception {
+	public int doUpdate(Object ing) throws SQLException {
 		int rowsUpdated = -1;
-		IngredientType type = new IngredientType();
 		type = (IngredientType)ing;
 		StringBuilder query = new StringBuilder("UPDATE " + getTableName() + " SET ");
 		query.append("ID=" + type.getTypeID() + ", ");

@@ -6,11 +6,8 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.ui.PlatformUI;
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
-import org.evansnet.dataconnector.ui.ConnectionDialog;
 
 /**
  * A class that allows for the creation of a repository in a database and 
@@ -31,27 +28,28 @@ import org.evansnet.dataconnector.ui.ConnectionDialog;
 public class RepositoryBuilder {
 	
 	public static final String class_name = "org.evansnset.ingredient.persistence.repository.RepositoryBuilder";
-	public static Logger javaLogger = Logger.getLogger(class_name);
+	public static final Logger javaLogger = Logger.getLogger(class_name);
 	
 	private IDatabase 	database;
 	private String 		sqlCreate;		//Create table statement
 	private String 		connStr;		//The connection string provided by the data connector.
+	private String 		repoName;
 	private Connection 	conn;			//The database connection provided by the data connector.
-	private IRepository repo;	//The newly created ingredient repository.
-	private ConnectionDialog connectionDialog;
+	private IRepository repo;			//The newly created ingredient repository.
 
 	
-	public RepositoryBuilder() {
+	public RepositoryBuilder(String name) {
 		// This constructor gets a connection dialog and subsequently the connection.
 		database = null;
 		sqlCreate = null;
 		connStr = null;
+		repoName = name;
 		conn = null;
 	}
 	
-	public RepositoryBuilder(String strConn) {
+	public RepositoryBuilder(String name, String strConn) {
 		//The constructor builds the repository if given a valid connection string as a parameter.
-		this();
+		this(name);
 		connStr = strConn;
 	}
 	
@@ -66,10 +64,10 @@ public class RepositoryBuilder {
 	 * @return An Ingredient repository object
 	 * @throws Exception 
 	 */	
-	public IRepository createRepository() throws Exception {
-		RepositoryHelper rhlp = new RepositoryHelper(database);
+	public IRepository createRepository(RepositoryHelper rhlp) throws Exception {
 		if (connStr == null) {
-			conn = buildConnection();
+			conn = rhlp.buildConnection();
+			connStr = rhlp.connStr;
 			} else {
 			DBType dbType = rhlp.parseForDBMS(connStr);
 			try {
@@ -78,12 +76,12 @@ public class RepositoryBuilder {
 				rhlp.showErrMessageBox("Create Repository Error!", 
 						"An error occurred while creating the repository table: " + e.getMessage() +
 						"\n See the log for more information.");
-				e.printStackTrace();
 			}			
 		}
 		repo = new IngredientRepository();
-		repo.setConnectStr(database.getConnectionString()); 	
+		repo.setConnectStr(connStr); 	
 		repo.setRepo(database);
+		repo.setRepoName(repoName);
 		buildTable(database.getConnection());
 		try {
 			conn.close();
@@ -91,40 +89,19 @@ public class RepositoryBuilder {
 			javaLogger.log(Level.FINEST, "Failed to close the repository database!");
 			rhlp.showErrMessageBox("Database Close Error!", 
 					"An error occurred while closing the repository database: " + e.getMessage() +
-					"\n See the log for more information.");
-			e.printStackTrace();
+					"\n See the log for more information. + \n ");
 		}
 		return repo;
 	}
 	
-	public IRepository createRepository(String strConn) throws Exception {
+	public IRepository createRepository(RepositoryHelper h, String strConn) throws Exception {
 		connStr = strConn;
-		repo = createRepository();
+		repo = createRepository(h);
 		return repo;
-	}
-	
-	/**
-	 * Used to create a connection definition and to return the connection to the database. 
-	 * In the process, this method sets the IHost type, and connection string for the repository database.
-	 * 
-	 * @return A JDBC connection to the database. 
-	 */
-	private Connection buildConnection() {
-		try {
-			connectionDialog = new ConnectionDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
-			database = (IDatabase)connectionDialog.open();
-			connStr = database.getConnectionString();
-			conn = database.getConnection();
-		} catch (Exception e) {
-			String message = "An exception occurred while creating a connection to the repository";
-			javaLogger.logp(Level.SEVERE, class_name, "buildConnection()", message + "\n" + e.getMessage());
-			e.printStackTrace(); 
-			conn = null;
-		}
-		return conn;
 	}
 	
 	private void buildTable(Connection c) throws SQLException {
+		conn = c;
 		try {
 			if (database.getSchema() == null || database.getSchema().isEmpty()) {
 			database.setSchema("dbo"); //TODO: Pop a dialog and get the schema from the user.
@@ -154,7 +131,6 @@ public class RepositoryBuilder {
 				if (database.getCredentials().getUserID().length == 0) {
 					javaLogger.log(Level.SEVERE, "No credentials are available!", class_name);
 					throw new SQLException("No credentials available for repository build.");
-					//TODO: Get credentials for the connection if not already defined.
 				}
 				javaLogger.logp(Level.INFO, class_name, "buildTable()", "Connecting to repository database..." );
 				conn = database.connect(connStr);
@@ -162,16 +138,13 @@ public class RepositoryBuilder {
 			
 			Statement st = conn.createStatement();
 			
-				javaLogger.logp(Level.INFO, class_name, "buildTable()", "Executing DDL statement...");
+				javaLogger.logp(Level.FINEST, class_name, "buildTable()", "Executing DDL statement...");
 			st.executeUpdate(sqlCreate);
 			javaLogger.logp(Level.INFO, class_name, "buildTable()", "Successfully created repository table.");
 			}
 		} catch (SQLException e) {
-//			RepositoryHelper helper = new RepositoryHelper(database);
 			javaLogger.log(Level.SEVERE, "An error occurred while creating the repository table. \n"
 					+ e.getMessage());
-//			helper.showErrMessageBox("Create Repository Table Error",
-//					"The create table statement failed to create the ingredient repository table!");
 		} finally {
 			if (!conn.isClosed()) {
 				conn.close();
