@@ -1,4 +1,4 @@
-package org.evansnet.ingredient.persistence.repository;
+package org.evansnet.ingredient.repository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -9,8 +9,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.evansnet.dataconnector.internal.core.Credentials;
 import org.evansnet.dataconnector.internal.core.DBType;
+import org.evansnet.dataconnector.internal.core.IDatabase;
+import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.model.Ingredient;
+import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
+import org.evansnet.repository.core.RepositoryHelper;
+import org.evansnet.repository.core.RepositoryImpl;
 
 
 /**
@@ -21,9 +32,10 @@ import org.evansnet.ingredient.model.Ingredient;
  * @author Dan Evans
  *
  */
-public class IngredientRepository extends RepositoryImpl implements IRepository {	
+public class IngredientRepository extends RepositoryImpl /*implements IRepository */ {	
 	
-	public final String INGREDIENT = "INGREDIENT";
+	private static final String INGREDIENT = "INGREDIENT";
+	public final String THIS_CLASS_NAME = IngredientRepository.class.getName();
 	
 	public IngredientRepository() {
 		super();
@@ -51,7 +63,7 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 		return null;
 	}
 	
-	@Override
+	
 	public Map<Integer, Object> fetchAll() throws Exception {
 		contents.clear();
 		Connection conn = connect();
@@ -77,7 +89,7 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 		return contents;
 	}
 
-	@Override
+	
 	public List<Object> fetchByName(String n) {
 		List<Object> result = new ArrayList<>();
 			try {
@@ -94,7 +106,7 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 		return result;
 	}
 	
-	@Override
+	
 	public int doInsertNew(Object ing) throws SQLException {
 		int rowsInserted = 0;
 		int id = getNextID();
@@ -151,7 +163,7 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 		return id;
 	}
 
-	@Override
+	
 	public int doUpdate(Object ing) throws SQLException {
 		int rowsUpd;
 		Ingredient i = (Ingredient) ing;
@@ -200,6 +212,72 @@ public class IngredientRepository extends RepositoryImpl implements IRepository 
 			conn.close();
 		}
 		return rowsUpd;
+	}
+
+	/**
+	 * Persists the connection string of the default ingredient repository table to the plug-in preference store.
+	 */
+	private void persistDefault() {
+		try {
+			IPreferenceStore store = Activator.getDefault().getPreferenceStore();
+			store.setValue(PreferenceConstants.PRE_REPO_CONN_STR, repo.getConnectionString());
+		} catch (Exception e) {
+			String msg = "An error occured while storing the default repository " +
+					"connection. The error message is: " + e.getMessage();
+			javaLogger.log(Level.SEVERE, THISCLASSNAME, msg);
+		}
+	}
+
+	/**
+	 * Retrieves the connection string of the default repository from the system and 
+	 * updates the provided database with the connection details. 
+	 * 
+	 * @param db An IDatabase object to update with the default repository's info
+	 * @return An IDatabase object that contains the information needed to operate the repository
+	 *            or null if the default repository is not yet defined.
+	 */
+	public IDatabase getDefaultRepository() throws Exception {
+		String thisMethodName = "getDefaultRepository()";
+		RepositoryHelper helper = null;
+		try {
+			IPreferenceStore prefStore = Activator.getDefault().getPreferenceStore();
+			repo.setConnectionString(prefStore.getString(PreferenceConstants.PRE_REPO_CONN_STR));
+			if (repo.getConnectionString().isEmpty() || repo.getConnectionString().equals("Repository JDBC connection string")) {
+				String message = "There is no repository defined. Open Windows then prefernces to define a default repository.";
+				javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, thisMethodName, message);
+				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				MessageBox mb = new MessageBox(window.getShell(), SWT.ERROR);
+				mb.setText("Ingredient Repository Error! "); 
+				mb.setMessage(message);
+				mb.open();
+				return null; 
+			}
+			helper = new RepositoryHelper(repo);
+			helper.declareDbType(helper.parseForDBMS(repo.getConnectionString()), repo.getConnectionString());
+			if (repo.getCredentials() == null) {
+				repo.setCredentials(new Credentials());
+			}
+			repo.getCredentials().setUserID(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID).toCharArray());
+			repo.getCredentials().setPassword(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD).toCharArray());
+		} catch (ClassNotFoundException | SQLException e) {
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, thisMethodName,
+					"An exception occurred while attempting to get the default repository info from the preference store " + 
+			         e.getMessage());
+		} catch (Exception e) {
+			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, thisMethodName, 
+					"An unidentifed exception occurred while retrieving the default ingredient repo" 
+					+ e.getMessage());
+			throw new Exception("getDefaultRepository failed. " + e.getMessage());
+		}
+		
+		//TODO: This is a temporary hack to append the user ID and password to the connection string.
+		//      To fix this, refactor this to use the dataconnector connection string factory.
+		// 		Currently this is specific to a SQL Server DB. Must be generic to any supported DBMS.
+		String connHack = repo.getConnectionString();
+		connHack = connHack + ";user=" + new String(repo.getCredentials().getUserID());
+		connHack = connHack + ";password=" + new String(repo.getCredentials().getPassword(helper.fetchCert()));
+		repo.setConnectionString(connHack);
+		return repo;
 	}
 
 }

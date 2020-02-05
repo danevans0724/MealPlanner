@@ -19,6 +19,7 @@ import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.persistence.IPersistenceProvider;
 import org.evansnet.ingredient.persistence.IngredientPersistenceAction;
 import org.evansnet.ingredient.persistence.IngredientProvider;
+import org.evansnet.common.util.*;
 
 
 /**
@@ -30,7 +31,7 @@ import org.evansnet.ingredient.persistence.IngredientProvider;
 public class IngredientEditor extends EditorPart {
 	
 	public static final String ID = "org.evansnet.ingredient.ingredienteditor";	
-	public static Logger javaLogger = Logger.getLogger("Ingredient editor logger");
+	public static final Logger javaLogger = Logger.getLogger("Ingredient editor logger");
 	Ingredient ingredient;
 	IngredientCompositeBase ingEditorComposite;
 	boolean dirty = false;
@@ -51,15 +52,19 @@ public class IngredientEditor extends EditorPart {
 		try {
 			provider = new IngredientProvider( ingEditorComposite.getIngredient(),
 					IngredientPersistenceAction.Ingredient_Save);
-			int id = provider.doSave(ingredient);
-			ingredient.setID(id);
+			if (provider.checkExists(ingredient.getID())) {
+				provider.doUpdate(ingredient.getID());
+			} else {
+				int id = provider.doInsertNew(ingredient);
+				ingredient.setID(id);
+			}
 			IngredientExplorerView explorerView = getIngredientExplorerView();
 			explorerView.addRepoItem(ingredient);
 		makeDirty(false);
 		} catch (SQLException  e) {
 			javaLogger.log(Level.SEVERE, "An SQL Exception occurred while trying to save an ingredient. \n " +
 				e.getErrorCode() + " " + e.getMessage() );
-			e.printStackTrace();
+			LoggingHelper.printStackTrace(javaLogger, e.getStackTrace());
 		} catch (Exception e) {
 			javaLogger.logp(Level.SEVERE, ID, "doSave()", 
 					"An unexpected exception occurred during save. " + e.getMessage());
@@ -77,7 +82,7 @@ public class IngredientEditor extends EditorPart {
 		try {
 			provider = new IngredientProvider(ingEditorComposite.getIngredient(), 
 					IngredientPersistenceAction.Ingredient_Delete);
-			int id = provider.doDelete(ingredient);
+			int id = provider.doDelete(ingredient.getID());
 			ingredient.setID(id);      //This is necessary because if a user deletes a new ingredient from the editor it will have an id=0;
 			//Refresh the tree view to remove the deleted ingredient.
 			IngredientExplorerView explorerView = getIngredientExplorerView();
@@ -87,6 +92,7 @@ public class IngredientEditor extends EditorPart {
 		} catch (Exception e) {
 			javaLogger.logp(Level.SEVERE, ID, "doDelete()", "An Exception occurred while trying to delete an ingredient. \n" +
 		       e.getMessage());
+			LoggingHelper.printStackTrace(javaLogger, e.getStackTrace());
 		}
 	}
 

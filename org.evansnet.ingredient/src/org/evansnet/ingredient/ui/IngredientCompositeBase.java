@@ -18,8 +18,8 @@ import org.eclipse.swt.widgets.Button;
 import org.evansnet.ingredient.model.Ingredient;
 import org.evansnet.ingredient.model.IngredientType;
 import org.evansnet.ingredient.model.Measures;
-import org.evansnet.ingredient.persistence.repository.IRepository;
-import org.evansnet.ingredient.persistence.repository.IngredientTypeRepository;
+import org.evansnet.ingredient.repository.IngredientTypeRepository;
+import org.evansnet.repository.core.IRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -201,7 +201,7 @@ public class IngredientCompositeBase extends Composite {
 			}
 		});
 		
-		fetchIngredientTypes(); // Go to the repository and get the ingredient types.
+//		fetchIngredientTypes(); // Go to the repository and get the ingredient types.
 		
 		// Placeholders for permanent methods.
 		fillTypesList();
@@ -212,14 +212,14 @@ public class IngredientCompositeBase extends Composite {
 		
 		m_bindingContext = initDataBindings();
 		// Set the type name of the current ingredient.
-		int ingType = ingredient.getIngredientType();
-		if (ingType < 1) {
-			//If the ingredient type is zero set it to 1 in order to avoid an exception later.
-			ingredient.setIngredientType(1);
-			ingType = 1;
-		}
-		IngredientType type = (IngredientType)(ingredientTypes.get(ingType));
-		cmbType.setText(type.getTypeName());
+//		int ingType = ingredient.getIngredientType();
+//		if (ingType < 1) {
+//			//If the ingredient type is zero set it to 1 in order to avoid an exception later.
+//			ingredient.setIngredientType(1);
+//			ingType = 1;
+//		}
+//		IngredientType type = (IngredientType)(ingredientTypes.get(ingType));
+//		cmbType.setText(type.getTypeName());
 	}
 
 	private void fillTypesList() {
@@ -233,7 +233,7 @@ public class IngredientCompositeBase extends Composite {
 	private void fetchIngredientTypes() {
 		try {
 			IRepository typeRepo = new IngredientTypeRepository();
-			typeRepo.fetchDefaultRepo();
+			typeRepo.getRepository();
 			ingredientTypes = typeRepo.fetchAll();
 		} catch ( Exception e) {
 			e.printStackTrace();

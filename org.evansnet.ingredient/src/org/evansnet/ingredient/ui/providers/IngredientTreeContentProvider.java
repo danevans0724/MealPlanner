@@ -8,8 +8,8 @@ import java.util.logging.Logger;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.evansnet.ingredient.model.Ingredient;
-import org.evansnet.ingredient.persistence.repository.IRepository;
-import org.evansnet.ingredient.persistence.repository.IngredientRepository;
+import org.evansnet.ingredient.repository.IngredientRepository;
+import org.evansnet.repository.core.IRepository;
 
 public class IngredientTreeContentProvider implements ITreeContentProvider {
 	

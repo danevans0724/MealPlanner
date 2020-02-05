@@ -4,7 +4,10 @@
       label="Ingredient"
       version="1.0.0.qualifier"
       provider-name="Evansnet"
-      os="linux,win32">
+      os="linux,win32"
+      ws="gtk,win32"
+      nl="en_US"
+      arch="x86_64">
 
    <description url="http://www.example.com/description">
       Contributes capabilities that allow the creation and edit of ingredients. Ingredients, in this context, are foodstuffs used for creating recipes and meals.

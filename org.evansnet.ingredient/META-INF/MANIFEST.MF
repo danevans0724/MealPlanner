@@ -18,7 +18,9 @@ Require-Bundle: org.eclipse.ui,
  com.ibm.icu,
  org.eclipse.ui.workbench,
  org.junit,
- org.evansnet.common
+ org.evansnet.model.common,
+ org.evansnet.repository;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: org.evansnet.common.security
+Import-Package: org.evansnet.common.security,
+ org.evansnet.common.util

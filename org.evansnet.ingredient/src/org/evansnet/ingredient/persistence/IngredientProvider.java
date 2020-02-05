@@ -4,11 +4,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 
+import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.ingredient.model.Ingredient;
-import org.evansnet.ingredient.persistence.IngredientPersistenceAction;
-import org.evansnet.ingredient.persistence.repository.IRepository;
-import org.evansnet.ingredient.persistence.repository.IngredientRepository;
-import org.evansnet.ingredient.persistence.repository.RepositoryHelper;
 
 /**
  * Provides persistence for ingredients. 
@@ -18,6 +15,8 @@ import org.evansnet.ingredient.persistence.repository.RepositoryHelper;
 public class IngredientProvider extends PersistenceProviderImpl {
 	
 	Ingredient ingredient;
+
+	
 	public IngredientProvider() throws Exception {
 		super();
 		ingredient = new Ingredient();
@@ -31,15 +30,15 @@ public class IngredientProvider extends PersistenceProviderImpl {
 	/* (non-Javadoc)
 	 * @see org.evansnet.ingredient.persistence.IPersistenceProvider#doSave()
 	 */
-	@Override
+
 	public int doSave(Object ingToSave) throws SQLException {
 		try {
 			int id = ((Ingredient)ingToSave).getID();	//A new ingredient will id = 0.
-			if	(!repository.checkExists(id)) {
-				id = repository.doInsertNew(ingToSave);
+			if	(!super.checkExists(id)) {
+				id = super.doInsertNew(ingToSave);
 				return id;
 			} else {
-				repository.doUpdate(ingToSave);
+				super.doUpdate(ingToSave);
 			}
 		} catch (Exception e) {
 			StringBuilder message = new StringBuilder("An exception occurred while storing an ingreding in the repository. ");
@@ -55,19 +54,19 @@ public class IngredientProvider extends PersistenceProviderImpl {
 	 * @see org.evansnet.ingredient.persistence.IPersistenceProvider#doUpdate(org.evansnet.ingredient.model.Ingredient)
 	 */
 	@Override
-	public void doUpdate(Object i) throws SQLException, Exception {
-		repository.doUpdate((Ingredient)i);
+	public int doUpdate(Object i) throws SQLException  {
+		return super.doUpdate((Ingredient)i);
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.evansnet.ingredient.persistence.IPersistenceProvider#doDelete(org.evansnet.ingredient.model.Ingredient)
 	 */
-	@Override
+	
 	public int doDelete(Object i) throws SQLException, Exception {
 		int id = ((Ingredient)i).getID();
 		if (id == 0) {
 			// The object in the editor doesn't have an id assigned. See if it exists in the database
-		List<Object> ing = repository.fetchByName(((Ingredient)i).getIngredientName());
+		List<Object> ing = super.fetchByName(((Ingredient)i).getIngredientName());
 			if (ing.isEmpty() ||ing == null) {
 				return 0;		// It isn't in the repository, so return.
 			} else {
@@ -78,30 +77,18 @@ public class IngredientProvider extends PersistenceProviderImpl {
 		// This deletes the first ingredient with the name shown.
 		//TODO: Add a routine that gives the user a choice of which one to delete.
 		//Always delete by ingredient id because id is unique.
-		id = repository.doDelete(id);	
+		id = super.doDelete(id);	
 		return id;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.evansnet.ingredient.persistence.IPersistenceProvider#setRepsitory(org.evansnet.ingredient.persistence.repository.IngredientRepository)
-	 */
-	@Override
-	public void setRepsitory(IRepository repo) {
-		repository = repo;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.evansnet.ingredient.persistence.IPersistenceProvider#getRepository()
 	 */
 	@Override
-	public IRepository getRepository() throws Exception {
+	public IDatabase getRepository() {
 		// If repository hasn't been set yet, get the default.
-		if (repository == null) {
-			repository = new IngredientRepository();
-			RepositoryHelper helper = new RepositoryHelper();
-			repository.setRepo(helper.getDefaultRepository());
-		} 
-		return repository;
+		return repo;
 	}
+
 	
 }

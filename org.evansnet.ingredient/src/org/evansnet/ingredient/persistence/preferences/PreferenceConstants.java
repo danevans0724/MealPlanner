@@ -10,5 +10,5 @@ public class PreferenceConstants {
 	
 	public static String PRE_REPO_CONN_STR = "";
 	public static String PRE_REPO_USER_ID = "User Id";
-	public static String PRE_REPO_USER_PWD = "passwprd";
+	public static String PRE_REPO_USER_PWD = "password";
 }

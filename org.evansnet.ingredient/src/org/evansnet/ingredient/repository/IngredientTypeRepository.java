@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.evansnet.ingredient.persistence.repository;
+package org.evansnet.ingredient.repository;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.evansnet.ingredient.model.IngredientType;
+import org.evansnet.repository.core.RepositoryImpl;
 
 /**
  * @author pmidce0
@@ -32,7 +33,7 @@ public class IngredientTypeRepository extends RepositoryImpl {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.evansnet.ingredient.persistence.repository.IRepository#getRepoVersion()
+	 * @see org.evansnet.ingredient.repository.IRepository#getRepoVersion()
 	 */
 	@Override
 	public String getRepoVersion() {

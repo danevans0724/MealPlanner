@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.evansnet.ingredient.model.Ingredient;
-import org.evansnet.ingredient.persistence.repository.IRepository;
+import org.evansnet.repository.core.IRepository;
 
 public class IngredientTreeLabelProvider extends LabelProvider {
 	

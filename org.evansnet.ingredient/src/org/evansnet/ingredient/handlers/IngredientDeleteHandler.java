@@ -34,7 +34,7 @@ public class IngredientDeleteHandler extends AbstractHandler {
 				Ingredient ingredient = (Ingredient) ((IngredientExplorerView) part).getRepo().fetchByName(ingName).get(0);
 				try {
 					IPersistenceProvider provider = new IngredientProvider(ingredient, IngredientPersistenceAction.Ingredient_Delete);
-					provider.doDelete(ingredient);
+					provider.doDelete(ingredient.getID());
 					((IngredientExplorerView)part).refresh(true);
 				} catch (Exception e) {
 					String message = "An error occured while attempting to delete an ingredient.";

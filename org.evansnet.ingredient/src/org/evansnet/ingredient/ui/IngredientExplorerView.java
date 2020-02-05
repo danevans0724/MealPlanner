@@ -20,10 +20,10 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.part.ViewPart;
 import org.evansnet.ingredient.handlers.IngredientEditHandler;
 import org.evansnet.ingredient.model.Ingredient;
-import org.evansnet.ingredient.persistence.repository.IRepository;
-import org.evansnet.ingredient.persistence.repository.IngredientRepository;
+import org.evansnet.ingredient.repository.IngredientRepository;
 import org.evansnet.ingredient.ui.providers.IngredientTreeContentProvider;
 import org.evansnet.ingredient.ui.providers.IngredientTreeLabelProvider;
+import org.evansnet.repository.core.IRepository;
 
 /**
  * Provides a tree view for navigating Ingredient types and ingredients in 
@@ -38,15 +38,15 @@ public class IngredientExplorerView extends ViewPart {
 	Logger javaLogger = Logger.getLogger(THIS_CLASS_NAME);
 	
 	TreeViewer treeviewer;
-	IRepository repo;
+	IRepository repository;
 	ISelectionService selectionService;
 	
-	
+	// TODO: Allow pointing to a different repo through the interface
 	public IngredientExplorerView() {
 		try {
-			repo = new IngredientRepository();
-			repo.setConnectStr(repo.fetchDefaultRepo());	// TODO: Allow pointing to a different repo through the interface
-			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "IngredientRepositoryView()", repo.getRepoName());
+//			repository = new IngredientRepository();
+//			repository.getRepository().setConnectionString(repository.getRepository().getConnectionString());	
+//			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "IngredientRepositoryView()", repository.getRepoName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -59,7 +59,7 @@ public class IngredientExplorerView extends ViewPart {
 		treeviewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		treeviewer.setLabelProvider(new IngredientTreeLabelProvider());
 		treeviewer.setContentProvider(new IngredientTreeContentProvider());
-		treeviewer.setInput(repo);
+		treeviewer.setInput(repository);
 		
 		// Register a context menu for ingredient edit and delete from the tree viewer.
 		MenuManager menuMgr = new MenuManager();
@@ -77,7 +77,7 @@ public class IngredientExplorerView extends ViewPart {
 			if (!(sel.isEmpty()) && sel instanceof IStructuredSelection) {
 				Object ing = ((IStructuredSelection)sel).getFirstElement();
 				if (ing instanceof String) {
-					List<Object> selectedIng = repo.fetchByName((String)ing);
+					List<Object> selectedIng = repository.fetchByName((String)ing);
 					Map<String, String> parms = new HashMap<String, String>();
 						IngredientInput input = new IngredientInput((Ingredient)selectedIng.get(0)); 
 
@@ -110,7 +110,7 @@ public class IngredientExplorerView extends ViewPart {
 	 * @param r The ingredient repository to use.
 	 */
 	public void setRepository(IRepository r) {
-		repo = r;
+		repository = r;
 		refresh(true);
 	}
 
@@ -123,17 +123,17 @@ public class IngredientExplorerView extends ViewPart {
 	}
 	
 	public IRepository getRepo() {
-		return repo;
+		return repository;
 	}
 
 	public void setRepo(IRepository repo) {
-		this.repo = repo;
+		this.repository = repo;
 	}
 	
 	public void removeRepoItem(int i) throws Exception {
-		String nodeToRemove = ((Ingredient)(repo.fetchById(i))).getIngredientName();
+		String nodeToRemove = ((Ingredient)(repository.fetchById(i))).getIngredientName();
 		treeviewer.remove(nodeToRemove);
-		repo.removeMappedItem(i);
+		repository.removeMappedItem(i);
 		refresh(true);
 	}
 
@@ -145,7 +145,7 @@ public class IngredientExplorerView extends ViewPart {
 	 */
 	public void addRepoItem(Ingredient ingredient) throws Exception {
 		@SuppressWarnings("unused")
-		Map<Integer, Object> dummy = repo.fetchAll();	// Update the repository. The variable is a dummy. We just want to refresh the map.
+		Map<Integer, Object> dummy = repository.fetchAll();	// Update the repository. The variable is a dummy. We just want to refresh the map.
 		dummy = null;
 		refresh(true);
 	}

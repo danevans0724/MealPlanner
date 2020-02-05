@@ -1,4 +1,4 @@
-package org.evansnet.ingredient.persistence.repository;
+package org.evansnet.ingredient.repository;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -8,6 +8,9 @@ import java.util.logging.Logger;
 
 import org.evansnet.dataconnector.internal.core.DBType;
 import org.evansnet.dataconnector.internal.core.IDatabase;
+//import org.evansnet.ingredient.repository.IngredientRepository;
+import org.evansnet.repository.core.IRepository;
+import org.evansnet.repository.core.RepositoryHelper;
 
 /**
  * A class that allows for the creation of a repository in a database and 
@@ -67,7 +70,7 @@ public class RepositoryBuilder {
 	public IRepository createRepository(RepositoryHelper rhlp) throws Exception {
 		if (connStr == null) {
 			conn = rhlp.buildConnection();
-			connStr = rhlp.connStr;
+			connStr = rhlp.getConnStr();
 			} else {
 			DBType dbType = rhlp.parseForDBMS(connStr);
 			try {
@@ -79,8 +82,8 @@ public class RepositoryBuilder {
 			}			
 		}
 		repo = new IngredientRepository();
-		repo.setConnectStr(connStr); 	
-		repo.setRepo(database);
+		repo.setRepository(database);
+		repo.getRepository().setConnectionString(connStr); 	
 		repo.setRepoName(repoName);
 		buildTable(database.getConnection());
 		try {

@@ -14,7 +14,9 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.evansnet.dataconnector.internal.core.IDatabase;
 import org.evansnet.ingredient.app.Activator;
 import org.evansnet.ingredient.persistence.preferences.PreferenceConstants;
-import org.evansnet.ingredient.persistence.repository.RepositoryHelper;
+import org.evansnet.ingredient.repository.IngredientRepository;
+import org.evansnet.repository.core.IRepository;
+import org.evansnet.repository.core.RepositoryHelper;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.GridData;
@@ -88,7 +90,7 @@ public class IngredientPreferences extends PreferencePage implements IWorkbenchP
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (!doTestRepositoryConn()) {
-					String msg = new String( "Could not connect to the ingredient repository!");
+					String msg ="Could not connect to the ingredient repository!";
 					MessageBox errBox = new MessageBox(parent.getShell(), SWT.ICON_ERROR);
 					errBox.setMessage(msg);
 					errBox.open();
@@ -168,11 +170,11 @@ public class IngredientPreferences extends PreferencePage implements IWorkbenchP
 	private boolean doTestRepositoryConn() {
 		MessageBox info; 
 		boolean result = false;
-		RepositoryHelper helper = new RepositoryHelper();
+		IRepository repo = new IngredientRepository();
 		String message = "Failed to connect to the repository shown.";
 		info = new MessageBox(this.getShell(), SWT.ICON_INFORMATION);
 		try {
-			IDatabase dbTest = helper.getDefaultRepository();
+			IDatabase dbTest = repo.getRepository();
 			if (dbTest == null) {
 				throw new Exception(message);
 			}
