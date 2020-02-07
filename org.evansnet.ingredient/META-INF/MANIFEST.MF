@@ -24,3 +24,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: org.evansnet.common.security,
  org.evansnet.common.util
+Export-Package: org.evansnet.ingredient.repository

@@ -236,7 +236,8 @@ public class IngredientRepository extends RepositoryImpl /*implements IRepositor
 	 * @return An IDatabase object that contains the information needed to operate the repository
 	 *            or null if the default repository is not yet defined.
 	 */
-	public IDatabase getDefaultRepository() throws Exception {
+	@Override
+	public IDatabase getDefaultRepository() {
 		String thisMethodName = "getDefaultRepository()";
 		RepositoryHelper helper = null;
 		try {
@@ -253,29 +254,40 @@ public class IngredientRepository extends RepositoryImpl /*implements IRepositor
 				return null; 
 			}
 			helper = new RepositoryHelper(repo);
-			helper.declareDbType(helper.parseForDBMS(repo.getConnectionString()), repo.getConnectionString());
+			try {
+				helper.declareDbType(helper.parseForDBMS(repo.getConnectionString()), repo.getConnectionString());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if (repo.getCredentials() == null) {
 				repo.setCredentials(new Credentials());
 			}
-			repo.getCredentials().setUserID(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID).toCharArray());
-			repo.getCredentials().setPassword(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD).toCharArray());
-		} catch (ClassNotFoundException | SQLException e) {
+			try {
+				repo.getCredentials().setUserID(prefStore.getString(PreferenceConstants.PRE_REPO_USER_ID).toCharArray());
+				repo.getCredentials().setPassword(prefStore.getString(PreferenceConstants.PRE_REPO_USER_PWD).toCharArray());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} catch ( SQLException e) {
 			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, thisMethodName,
 					"An exception occurred while attempting to get the default repository info from the preference store " + 
 			         e.getMessage());
-		} catch (Exception e) {
-			javaLogger.logp(Level.SEVERE, THIS_CLASS_NAME, thisMethodName, 
-					"An unidentifed exception occurred while retrieving the default ingredient repo" 
-					+ e.getMessage());
-			throw new Exception("getDefaultRepository failed. " + e.getMessage());
 		}
 		
 		//TODO: This is a temporary hack to append the user ID and password to the connection string.
 		//      To fix this, refactor this to use the dataconnector connection string factory.
 		// 		Currently this is specific to a SQL Server DB. Must be generic to any supported DBMS.
-		String connHack = repo.getConnectionString();
-		connHack = connHack + ";user=" + new String(repo.getCredentials().getUserID());
-		connHack = connHack + ";password=" + new String(repo.getCredentials().getPassword(helper.fetchCert()));
+		String connHack = null;
+		try {
+			connHack = repo.getConnectionString();
+			connHack = connHack + ";user=" + new String(repo.getCredentials().getUserID());
+			connHack = connHack + ";password=" + new String(repo.getCredentials().getPassword(helper.fetchCert()));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 		repo.setConnectionString(connHack);
 		return repo;
 	}

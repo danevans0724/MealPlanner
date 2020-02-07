@@ -24,6 +24,7 @@ import org.evansnet.ingredient.repository.IngredientRepository;
 import org.evansnet.ingredient.ui.providers.IngredientTreeContentProvider;
 import org.evansnet.ingredient.ui.providers.IngredientTreeLabelProvider;
 import org.evansnet.repository.core.IRepository;
+import org.evansnet.common.util.LoggingHelper;
 
 /**
  * Provides a tree view for navigating Ingredient types and ingredients in 
@@ -31,6 +32,7 @@ import org.evansnet.repository.core.IRepository;
  * @author pmidce0
  *
  */
+@SuppressWarnings("restriction")
 public class IngredientExplorerView extends ViewPart {
 	public static final String ID = "org.evansnet.ingredient.ui.ingredientexplorerview";
 	
@@ -43,13 +45,13 @@ public class IngredientExplorerView extends ViewPart {
 	
 	// TODO: Allow pointing to a different repo through the interface
 	public IngredientExplorerView() {
-		try {
+//		try {
 //			repository = new IngredientRepository();
-//			repository.getRepository().setConnectionString(repository.getRepository().getConnectionString());	
+//			repository.getDefaultRepository().setConnectionString(repository.getRepository().getConnectionString());	
 //			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "IngredientRepositoryView()", repository.getRepoName());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		} catch (Exception e) {
+//			LoggingHelper.printStackTrace(javaLogger, e.getStackTrace());
+//		}
 	}
 
 	@Override
