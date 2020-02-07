@@ -43,16 +43,6 @@ public class IngredientExplorerView extends ViewPart {
 	IRepository repository;
 	ISelectionService selectionService;
 	
-	// TODO: Allow pointing to a different repo through the interface
-	public IngredientExplorerView() {
-//		try {
-//			repository = new IngredientRepository();
-//			repository.getDefaultRepository().setConnectionString(repository.getRepository().getConnectionString());	
-//			javaLogger.logp(Level.INFO, THIS_CLASS_NAME, "IngredientRepositoryView()", repository.getRepoName());
-//		} catch (Exception e) {
-//			LoggingHelper.printStackTrace(javaLogger, e.getStackTrace());
-//		}
-	}
 
 	@Override
 	public void createPartControl(Composite parent) {

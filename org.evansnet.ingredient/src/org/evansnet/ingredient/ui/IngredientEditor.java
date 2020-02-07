@@ -46,6 +46,7 @@ public class IngredientEditor extends EditorPart {
 		setIngredient(i);
 	}
 	
+	@SuppressWarnings("restriction")
 	@Override
 	public void doSave(IProgressMonitor monitor)  {
 		IPersistenceProvider provider;
